@@ -27,7 +27,6 @@ A UF2 file consists of 512 byte blocks. Each block starts with a 32 byte
 header, followed by data, and a final magic number.
 All fields, except for data, are 32 bit unsigned little endian integers.
 
-
 | Offset | Size | Value                                             |
 |--------|------|---------------------------------------------------|
 | 0      | 4    | First magic number, `0x0A324655` (`"UF2\n"`)      |
