@@ -115,6 +115,7 @@ def writeFile(name, buf):
     print "Wrote %d bytes to %s." % (len(buf), name)
 
 def main():
+    global appstartaddr
     def error(msg):
         print msg
         sys.exit(1)
