@@ -29,7 +29,8 @@ def convertFromUF2(buf):
         block = buf[ptr:ptr + 512]
         hd = struct.unpack("<IIIIIIII", block[0:32])
         if hd[0] != UF2_MAGIC_START0 or hd[1] != UF2_MAGIC_START1:
-            assert False, "Invalid UF2 magic at " + ptr
+            print "Skipping block at " + ptr + "; bad magic"
+            continue
         if hd[2] & 1:
             # NO-flash flag set; skip block
             continue
