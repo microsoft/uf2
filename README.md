@@ -1,14 +1,15 @@
 # USB Flashing Format (UF2)
 
-UF2 (USB Flashing Format) is a name of a file format, that is particularly
+UF2 (USB Flashing Format) is a file format that is particularly
 suitable for flashing devices over MSC (Mass Storage Class most commonly used
-by various pendrives) The file consists of 512 byte blocks, each of which is
+by various pendrives). The file consists of 512 byte blocks, each of which is
 self-contained and independent of others.
 
 Each 512 byte block consist of (see `uf2.h` for details):
 * magic numbers at the beginning and at the end
 * address where the data should be flashed
 * size of data
+* block index and total number of blocks in file
 * data (up to 476 bytes; for SAMD it's 256 bytes so it's easy to flash in one go)
 
 Thus, it's really easy for the microcontroller to recognize a block of
@@ -25,7 +26,7 @@ external flash chip, SD card etc.).
 
 These configuration values can be read from `INFO_UF2.TXT` file.
 Presence of this file can be tested to see if the board supports `UF2` flashing,
-while contest, particularly `Board-ID` field, can be used for feature detection.
+while contest, particularly `BOARD_ID` field, can be used for feature detection.
 
 The current flash contents of the board is exposed as `CURRENT.UF2` file.
 This file includes the bootloader address space. The last word of bootloader
