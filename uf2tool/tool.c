@@ -116,9 +116,9 @@ void talk_hid(HID_Dev *pkt, int cmd, const void *data, uint32_t len) {
     uint32_t saved = read32(pkt->buf);
     send_hid(pkt->dev, pkt->buf, 4 + len);
     recv_hid(pkt, -1);
-    if (read32(pkt->buf) != saved)
+    if ((read32(pkt->buf) & 0x7fffffff) != saved)
         fatal("invalid sequence number");
-    if (read32(pkt->buf + 4) != 0)
+    if (read32(pkt->buf) & 0x80000000)
         fatal("invalid status");
 }
 
@@ -149,7 +149,7 @@ void verify(HID_Dev *cmd, uint8_t *buf, int size, int offset) {
     write32(cmd->buf + 8, numpages);
     talk_hid(cmd, HF2_CMD_CHKSUM_PAGES, 0, 8);
     for (int i = 0; i < numpages; ++i) {
-        int sum = read16(cmd->buf + 8 + i * 2);
+        int sum = read16(cmd->buf + 4 + i * 2);
         uint16_t crc = 0;
         for (int j = 0; j < cmd->pageSize; ++j) {
             crc = add_crc(buf[j], crc);
@@ -207,15 +207,15 @@ int main(int argc, char *argv[]) {
     }
 
     talk_hid(&cmd, HF2_CMD_INFO, 0, 0);
-    printf("INFO: %s\n", cmd.buf + 8);
+    printf("INFO: %s\n", cmd.buf + 4);
 
-	serial(&cmd);
+	//serial(&cmd);
 
     talk_hid(&cmd, HF2_CMD_BININFO, 0, 0);
-    if (read32(cmd.buf + 8) != HF2_MODE_BOOTLOADER)
+    if (cmd.buf[4] != HF2_MODE_BOOTLOADER)
         fatal("not bootloader");
 
-    cmd.pageSize = read32(cmd.buf + 12);
+    cmd.pageSize = read32(cmd.buf + 8);
     printf("page size: %d\n", cmd.pageSize);
 
     srand(millis());
@@ -238,8 +238,9 @@ int main(int argc, char *argv[]) {
 
     for (i = 0; i < sizeof(flashbuf); i += cmd.pageSize) {
         write32(cmd.buf + 4, i + 0x2000);
-        talk_hid(&cmd, HF2_CMD_MEM_READ_PAGE, 0, 4);
-        if (memcmp(cmd.buf + 8, flashbuf + i, cmd.pageSize)) {
+        write32(cmd.buf + 8, cmd.pageSize / 4);
+        talk_hid(&cmd, HF2_CMD_MEM_READ_WORDS, 0, 8);
+        if (memcmp(cmd.buf + 4, flashbuf + i, cmd.pageSize)) {
             printf("%d,%d,%d != %d?\n", cmd.buf[8], cmd.buf[9], cmd.buf[10], flashbuf[i]);
             fatal("verification failed");
         }
