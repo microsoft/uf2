@@ -18,7 +18,12 @@ typedef struct {
     uint8_t serial;
     uint16_t seqNo;
     uint16_t pageSize;
-    uint8_t buf[FLASH_ROW_SIZE + 64];
+    uint32_t flashSize;
+    uint32_t msgSize;
+    union {
+        uint8_t buf[4096];
+        HF2_Response resp;
+    };
 } HID_Dev;
 
 uint64_t millis() {
@@ -67,17 +72,21 @@ int recv_hid(HID_Dev *pkt, int timeout) {
             buf++; // skip report number if passed
 
         uint8_t tag = buf[0];
-        if (pkt->size && !(tag & 0x80))
+        if (pkt->size && !(tag & HF2_FLAG_SERIAL_OUT))
             fatal("invalid serial transfer");
         uint32_t newsize = pkt->size + (tag & HF2_SIZE_MASK);
         if (newsize > sizeof(pkt->buf))
             fatal("too large packet");
         memcpy(pkt->buf + pkt->size, buf + 1, tag & HF2_SIZE_MASK);
         pkt->size = newsize;
-        if (tag & 0x40) {
-            pkt->serial = (tag & HF2_FLAG_MASK) == HF2_FLAG_SERIAL;
+
+        tag &= HF2_FLAG_MASK;
+        if (tag != HF2_FLAG_CMDPKT_BODY) {
+            pkt->serial = //
+                tag == HF2_FLAG_SERIAL_OUT ? 1 : tag == HF2_FLAG_SERIAL_ERR ? 2 : 0;
             return 1;
         }
+
         timeout = -1; // next read is blocking
     }
 }
@@ -90,10 +99,10 @@ void send_hid(hid_device *dev, const void *data, int size) {
         int s;
         if (size <= 63) {
             s = size;
-            buf[1] = HF2_FLAG_PKT_LAST | size;
+            buf[1] = HF2_FLAG_CMDPKT_LAST | size;
         } else {
             s = 63;
-            buf[1] = HF2_FLAG_PKT_BODY | 63;
+            buf[1] = HF2_FLAG_CMDPKT_BODY | 63;
         }
         memcpy(buf + 2, ptr, s);
         int sz = hid_write(dev, buf, 65);
@@ -107,18 +116,18 @@ void send_hid(hid_device *dev, const void *data, int size) {
 }
 
 void talk_hid(HID_Dev *pkt, int cmd, const void *data, uint32_t len) {
-    if (len >= sizeof(pkt->buf) - 4)
+    if (len >= sizeof(pkt->buf) - 8)
         fatal("buffer overflow");
     if (data)
-        memcpy(pkt->buf + 4, data, len);
-    write16(pkt->buf, cmd);
-    write16(pkt->buf + 2, ++pkt->seqNo);
-    uint32_t saved = read32(pkt->buf);
-    send_hid(pkt->dev, pkt->buf, 4 + len);
+        memcpy(pkt->buf + 8, data, len);
+    write32(pkt->buf, cmd);
+    write16(pkt->buf + 4, ++pkt->seqNo);
+    write16(pkt->buf + 6, 0);
+    send_hid(pkt->dev, pkt->buf, 8 + len);
     recv_hid(pkt, -1);
-    if ((read32(pkt->buf) & 0x7fffffff) != saved)
+    if (read16(pkt->buf) != pkt->seqNo)
         fatal("invalid sequence number");
-    if (read32(pkt->buf) & 0x80000000)
+    if (read16(pkt->buf + 2))
         fatal("invalid status");
 }
 
@@ -137,7 +146,7 @@ unsigned short add_crc(char ptr, unsigned short crc) {
 }
 
 void verify(HID_Dev *cmd, uint8_t *buf, int size, int offset) {
-    int maxSize = (cmd->pageSize / 2 - 8) * cmd->pageSize;
+    int maxSize = (cmd->pageSize / 2 - 12) * cmd->pageSize;
     while (size > maxSize) {
         verify(cmd, buf, maxSize, offset);
         buf += maxSize;
@@ -145,8 +154,8 @@ void verify(HID_Dev *cmd, uint8_t *buf, int size, int offset) {
         size -= maxSize;
     }
     int numpages = size / cmd->pageSize;
-    write32(cmd->buf + 4, offset);
-    write32(cmd->buf + 8, numpages);
+    write32(cmd->buf + 8, offset);
+    write32(cmd->buf + 12, numpages);
     talk_hid(cmd, HF2_CMD_CHKSUM_PAGES, 0, 8);
     for (int i = 0; i < numpages; ++i) {
         int sum = read16(cmd->buf + 4 + i * 2);
@@ -175,7 +184,7 @@ void serial(HID_Dev *cmd) {
             memset(buf, 0, 65);
             int sz = read(0, buf + 2, 63);
             if (sz > 0) {
-                buf[1] = HF2_FLAG_SERIAL | sz;
+                buf[1] = HF2_FLAG_SERIAL_OUT | sz;
                 hid_write(cmd->dev, buf, 65);
             }
         }
@@ -209,14 +218,16 @@ int main(int argc, char *argv[]) {
     talk_hid(&cmd, HF2_CMD_INFO, 0, 0);
     printf("INFO: %s\n", cmd.buf + 4);
 
-	//serial(&cmd);
+    // serial(&cmd);
 
     talk_hid(&cmd, HF2_CMD_BININFO, 0, 0);
     if (cmd.buf[4] != HF2_MODE_BOOTLOADER)
         fatal("not bootloader");
 
     cmd.pageSize = read32(cmd.buf + 8);
-    printf("page size: %d\n", cmd.pageSize);
+    cmd.flashSize = read32(cmd.buf + 12) * cmd.pageSize;
+    cmd.msgSize = read32(cmd.buf + 16);
+    printf("page size: %d, total: %dkB\n", cmd.pageSize, cmd.flashSize / 1024);
 
     srand(millis());
     int i;
@@ -226,8 +237,8 @@ int main(int argc, char *argv[]) {
     uint64_t start = millis();
 
     for (i = 0; i < sizeof(flashbuf); i += cmd.pageSize) {
-        write32(cmd.buf + 4, i + 0x2000);
-        memcpy(cmd.buf + 8, flashbuf + i, cmd.pageSize);
+        write32(cmd.buf + 8, i + 0x2000);
+        memcpy(cmd.buf + 12, flashbuf + i, cmd.pageSize);
         talk_hid(&cmd, HF2_CMD_WRITE_FLASH_PAGE, 0, cmd.pageSize + 4);
     }
 
@@ -235,10 +246,9 @@ int main(int argc, char *argv[]) {
     start = millis();
 
 #if 0
-
     for (i = 0; i < sizeof(flashbuf); i += cmd.pageSize) {
-        write32(cmd.buf + 4, i + 0x2000);
-        write32(cmd.buf + 8, cmd.pageSize / 4);
+        write32(cmd.buf + 8, i + 0x2000);
+        write32(cmd.buf + 12, cmd.pageSize / 4);
         talk_hid(&cmd, HF2_CMD_MEM_READ_WORDS, 0, 8);
         if (memcmp(cmd.buf + 4, flashbuf + i, cmd.pageSize)) {
             printf("%d,%d,%d != %d?\n", cmd.buf[8], cmd.buf[9], cmd.buf[10], flashbuf[i]);

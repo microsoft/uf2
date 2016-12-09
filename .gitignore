@@ -4,3 +4,4 @@ flash.uf2
 flash.bin
 
 built/
+uf2tool/uf2hid.h
