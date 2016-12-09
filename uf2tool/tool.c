@@ -72,7 +72,7 @@ int recv_hid(HID_Dev *pkt, int timeout) {
             buf++; // skip report number if passed
 
         uint8_t tag = buf[0];
-        if (pkt->size && !(tag & HF2_FLAG_SERIAL_OUT))
+        if (pkt->size && (tag & HF2_FLAG_SERIAL_OUT))
             fatal("invalid serial transfer");
         uint32_t newsize = pkt->size + (tag & HF2_SIZE_MASK);
         if (newsize > sizeof(pkt->buf))
@@ -218,7 +218,7 @@ int main(int argc, char *argv[]) {
     talk_hid(&cmd, HF2_CMD_INFO, 0, 0);
     printf("INFO: %s\n", cmd.buf + 4);
 
-    // serial(&cmd);
+    serial(&cmd);
 
     talk_hid(&cmd, HF2_CMD_BININFO, 0, 0);
     if (cmd.buf[4] != HF2_MODE_BOOTLOADER)
