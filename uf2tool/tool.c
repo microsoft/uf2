@@ -7,6 +7,7 @@
 #include <poll.h>
 #include <unistd.h>
 #include <sys/time.h>
+#include <stdbool.h>
 #include "hidapi.h"
 #include "uf2hid.h"
 
@@ -179,18 +180,21 @@ int stdinHasData() {
 
 void serial(HID_Dev *cmd) {
     uint8_t buf[65];
+    bool stdinClosed = false;
     for (;;) {
-        while (stdinHasData()) {
+        while (!stdinClosed && stdinHasData()) {
             memset(buf, 0, 65);
             int sz = read(0, buf + 2, 63);
             if (sz > 0) {
                 buf[1] = HF2_FLAG_SERIAL_OUT | sz;
                 hid_write(cmd->dev, buf, 65);
             }
+            if (sz == 0)
+                stdinClosed = true;
         }
         if (recv_hid(cmd, 10)) {
             if (cmd->serial)
-                write(1, cmd->buf, cmd->size);
+                write(cmd->serial, cmd->buf, cmd->size);
         }
     }
 }
