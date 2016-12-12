@@ -4,10 +4,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <poll.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <stdbool.h>
+#include <pthread.h>
 #include "hidapi.h"
 #include "uf2hid.h"
 
@@ -170,28 +170,26 @@ void verify(HID_Dev *cmd, uint8_t *buf, int size, int offset) {
     }
 }
 
-int stdinHasData() {
-    struct pollfd fds;
-    fds.fd = 0;
-    fds.events = POLLIN;
-    fds.revents = 0;
-    return poll(&fds, 1, 0) > 0;
+void *forward_stdin(void *cmd0) {
+    uint8_t buf[65];
+    HID_Dev *cmd = cmd0;
+    for (;;) {
+        memset(buf, 0, 65);
+        int sz = read(0, buf + 2, 63);
+        if (sz > 0) {
+            buf[1] = HF2_FLAG_SERIAL_OUT | sz;
+            hid_write(cmd->dev, buf, 65);
+        }
+        if (sz == 0)
+            break;
+    }
+    return NULL;
 }
 
 void serial(HID_Dev *cmd) {
-    uint8_t buf[65];
-    bool stdinClosed = false;
+    pthread_t stdinFwd;
+    pthread_create(&stdinFwd, NULL, forward_stdin, cmd);
     for (;;) {
-        while (!stdinClosed && stdinHasData()) {
-            memset(buf, 0, 65);
-            int sz = read(0, buf + 2, 63);
-            if (sz > 0) {
-                buf[1] = HF2_FLAG_SERIAL_OUT | sz;
-                hid_write(cmd->dev, buf, 65);
-            }
-            if (sz == 0)
-                stdinClosed = true;
-        }
         if (recv_hid(cmd, 10)) {
             if (cmd->serial)
                 write(cmd->serial, cmd->buf, cmd->size);
@@ -209,7 +207,8 @@ int main(int argc, char *argv[]) {
     struct hid_device_info *devs = hid_enumerate(0, 0);
     for (struct hid_device_info *p = devs; p; p = p->next) {
         if ((p->release_number & 0xff00) == 0x4200) {
-            printf("DEV: %04x:%04x %s\n", p->vendor_id, p->product_id, p->path);
+            printf("DEV: %04x:%04x %04x %s\n", p->vendor_id, p->product_id, p->release_number,
+                   p->path);
             cmd.dev = hid_open_path(p->path);
         }
     }
