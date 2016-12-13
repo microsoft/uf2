@@ -125,6 +125,10 @@ void talk_hid(HID_Dev *pkt, int cmd, const void *data, uint32_t len) {
     write16(pkt->buf + 4, ++pkt->seqNo);
     write16(pkt->buf + 6, 0);
     send_hid(pkt->dev, pkt->buf, 8 + len);
+
+    if (cmd == HF2_CMD_RESET_INTO_APP)
+        return; // no response expected
+
     recv_hid(pkt, -1);
     if (read16(pkt->buf) != pkt->seqNo)
         fatal("invalid sequence number");
@@ -201,27 +205,48 @@ int main(int argc, char *argv[]) {
     int res;
     HID_Dev cmd = {0};
 
+    if (argc != 2) {
+        printf("usage: %s serial\n", argv[0]);
+        printf("   or: %s random\n", argv[0]);
+        printf("   or: %s file.bin\n", argv[0]);
+        return 1;
+    }
+
+    const char *filename = argv[1];
+
     // Initialize the hidapi library
     res = hid_init();
 
+    bool listMode = strcmp(filename, "list") == 0;
+
     struct hid_device_info *devs = hid_enumerate(0, 0);
     for (struct hid_device_info *p = devs; p; p = p->next) {
-        if ((p->release_number & 0xff00) == 0x4200) {
-            printf("DEV: %04x:%04x %04x %s\n", p->vendor_id, p->product_id, p->release_number,
-                   p->path);
+        int isOK = (p->release_number & 0xff00) == 0x4200;
+        const char *path = strstr(p->path, "@1400");
+        if (!path)
+            path = p->path;
+        if (listMode)
+            printf("%s: %04x:%04x %04x %s\n", isOK ? "HF2" : "...", p->vendor_id, p->product_id,
+                   p->release_number, path);
+        if (isOK) {
             cmd.dev = hid_open_path(p->path);
         }
     }
     hid_free_enumeration(devs);
+    if (listMode)
+        return 0;
     if (!cmd.dev) {
         printf("no devices\n");
-        return 0;
+        return 1;
     }
 
     talk_hid(&cmd, HF2_CMD_INFO, 0, 0);
     printf("INFO: %s\n", cmd.buf + 4);
 
-    serial(&cmd);
+    if (strcmp(filename, "serial") == 0) {
+        serial(&cmd);
+        return 0;
+    }
 
     talk_hid(&cmd, HF2_CMD_BININFO, 0, 0);
     if (cmd.buf[4] != HF2_MODE_BOOTLOADER)
@@ -232,14 +257,27 @@ int main(int argc, char *argv[]) {
     cmd.msgSize = read32(cmd.buf + 16);
     printf("page size: %d, total: %dkB\n", cmd.pageSize, cmd.flashSize / 1024);
 
-    srand(millis());
     int i;
-    for (i = 0; i < sizeof(flashbuf); ++i)
-        flashbuf[i] = rand();
+    size_t filesize = sizeof(flashbuf);
+
+    if (strcmp(filename, "random") == 0) {
+        srand(millis());
+        for (i = 0; i < filesize; ++i)
+            flashbuf[i] = rand();
+    } else {
+        FILE *f = fopen(filename, "rb");
+        if (!f) {
+            fatal("cannot open file");
+        }
+        filesize = fread(flashbuf, 1, sizeof(flashbuf), f);
+        filesize = (filesize + (cmd.pageSize - 1)) / cmd.pageSize * cmd.pageSize;
+        printf("read %ld bytes from %s\n", filesize, filename);
+        fclose(f);
+    }
 
     uint64_t start = millis();
 
-    for (i = 0; i < sizeof(flashbuf); i += cmd.pageSize) {
+    for (i = 0; i < filesize; i += cmd.pageSize) {
         write32(cmd.buf + 8, i + 0x2000);
         memcpy(cmd.buf + 12, flashbuf + i, cmd.pageSize);
         talk_hid(&cmd, HF2_CMD_WRITE_FLASH_PAGE, 0, cmd.pageSize + 4);
@@ -249,7 +287,7 @@ int main(int argc, char *argv[]) {
     start = millis();
 
 #if 0
-    for (i = 0; i < sizeof(flashbuf); i += cmd.pageSize) {
+    for (i = 0; i < filesize; i += cmd.pageSize) {
         write32(cmd.buf + 8, i + 0x2000);
         write32(cmd.buf + 12, cmd.pageSize / 4);
         talk_hid(&cmd, HF2_CMD_MEM_READ_WORDS, 0, 8);
@@ -259,10 +297,14 @@ int main(int argc, char *argv[]) {
         }
     }
 #else
-    verify(&cmd, flashbuf, sizeof(flashbuf), 0x2000);
+    verify(&cmd, flashbuf, filesize, 0x2000);
 #endif
 
     printf("verify time: %d\n", (int)(millis() - start));
+
+    talk_hid(&cmd, HF2_CMD_RESET_INTO_APP, 0, 0);
+
+    printf("device reset.\n");
 
     // Finalize the hidapi library
     res = hid_exit();
