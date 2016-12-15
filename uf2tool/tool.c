@@ -225,9 +225,12 @@ int main(int argc, char *argv[]) {
         const char *path = strstr(p->path, "@1400");
         if (!path)
             path = p->path;
-        if (listMode)
-            printf("%s: %04x:%04x %04x %s\n", isOK ? "HF2" : "...", p->vendor_id, p->product_id,
-                   p->release_number, path);
+        if (listMode) {
+            // exclude Apple devices
+            if (p->vendor_id != 0x05ac)
+                printf("%s: %04x:%04x %04x %s\n", isOK ? "HF2" : "...", p->vendor_id, p->product_id,
+                       p->release_number, path);
+        }
         if (isOK) {
             cmd.dev = hid_open_path(p->path);
         }
