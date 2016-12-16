@@ -136,7 +136,7 @@ void talk_hid(HID_Dev *pkt, int cmd, const void *data, uint32_t len) {
         fatal("invalid status");
 }
 
-uint8_t flashbuf[64 * 1024];
+uint8_t flashbuf[256 * 1024];
 
 unsigned short add_crc(char ptr, unsigned short crc) {
     unsigned short cmpt;
@@ -243,13 +243,13 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    talk_hid(&cmd, HF2_CMD_INFO, 0, 0);
-    printf("INFO: %s\n", cmd.buf + 4);
-
     if (strcmp(filename, "serial") == 0) {
         serial(&cmd);
         return 0;
     }
+
+    talk_hid(&cmd, HF2_CMD_INFO, 0, 0);
+    printf("INFO: %s\n", cmd.buf + 4);
 
     talk_hid(&cmd, HF2_CMD_BININFO, 0, 0);
     if (cmd.buf[4] != HF2_MODE_BOOTLOADER)
@@ -261,10 +261,11 @@ int main(int argc, char *argv[]) {
     printf("page size: %d, total: %dkB\n", cmd.pageSize, cmd.flashSize / 1024);
 
     int i;
-    size_t filesize = sizeof(flashbuf);
+    size_t filesize;
 
     if (strcmp(filename, "random") == 0) {
         srand(millis());
+        filesize = 64 * 1024;
         for (i = 0; i < filesize; ++i)
             flashbuf[i] = rand();
     } else {
@@ -272,7 +273,12 @@ int main(int argc, char *argv[]) {
         if (!f) {
             fatal("cannot open file");
         }
-        filesize = fread(flashbuf, 1, sizeof(flashbuf), f);
+        int len = 1;
+        filesize = 0;
+        while (len) {
+            len = fread(flashbuf + filesize, 1, sizeof(flashbuf) - filesize, f);
+            filesize += len;
+        }
         filesize = (filesize + (cmd.pageSize - 1)) / cmd.pageSize * cmd.pageSize;
         printf("read %ld bytes from %s\n", filesize, filename);
         fclose(f);
