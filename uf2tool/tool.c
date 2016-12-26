@@ -206,9 +206,10 @@ int main(int argc, char *argv[]) {
     HID_Dev cmd = {0};
 
     if (argc != 2) {
-        printf("usage: %s serial\n", argv[0]);
-        printf("   or: %s random\n", argv[0]);
-        printf("   or: %s file.bin\n", argv[0]);
+        printf("usage: %s serial   (run 'serial' port forwarding)\n", argv[0]);
+        printf("   or: %s list     (list devices)\n", argv[0]);
+        printf("   or: %s random   (write random bin file)\n", argv[0]);
+        printf("   or: %s file.bin (write specified bin file)\n", argv[0]);
         return 1;
     }
 
@@ -250,6 +251,8 @@ int main(int argc, char *argv[]) {
 
     talk_hid(&cmd, HF2_CMD_INFO, 0, 0);
     printf("INFO: %s\n", cmd.buf + 4);
+
+    talk_hid(&cmd, HF2_CMD_START_FLASH, 0, 0);
 
     talk_hid(&cmd, HF2_CMD_BININFO, 0, 0);
     if (cmd.buf[4] != HF2_MODE_BOOTLOADER)
