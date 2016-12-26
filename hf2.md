@@ -242,6 +242,19 @@ struct HF2_WRITE_WORDS_Command {
 // no result
 ```
 
+### DMESG (0x0010)
+
+Return internal log buffer if any.
+The result is a character array.
+
+```c
+// no arguments
+struct HF2_DMESG_Result {
+    uint8_t logs[...];
+};
+```
+
+
 ## Extensibility
 
 The HF2 protocol is easy to extend with new command messages.  The command ids

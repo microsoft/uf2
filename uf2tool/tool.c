@@ -11,8 +11,6 @@
 #include "hidapi.h"
 #include "uf2hid.h"
 
-#define FLASH_ROW_SIZE 4096
-
 typedef struct {
     hid_device *dev;
     uint16_t size;
@@ -22,7 +20,7 @@ typedef struct {
     uint32_t flashSize;
     uint32_t msgSize;
     union {
-        uint8_t buf[4096];
+        uint8_t buf[64 * 1024];
         HF2_Response resp;
     };
 } HID_Dev;
@@ -206,10 +204,14 @@ int main(int argc, char *argv[]) {
     HID_Dev cmd = {0};
 
     if (argc != 2) {
-        printf("usage: %s serial   (run 'serial' port forwarding)\n", argv[0]);
-        printf("   or: %s list     (list devices)\n", argv[0]);
-        printf("   or: %s random   (write random bin file)\n", argv[0]);
-        printf("   or: %s file.bin (write specified bin file)\n", argv[0]);
+        printf("usage: %s COMMAND [ARGUMENTS...]\n", argv[0]);
+        printf("Commands include:\n");
+        printf("   serial           - run 'serial' port forwarding\n");
+        printf("   list             - list devices\n");
+        printf("   dmesg            - dump internal runtime logs from the device\n");
+        printf("   info             - dump information about the device\n");
+        printf("   write BIN_FILE   - write specified bin file\n");
+        printf("   random           - write randomly generated bin file\n");
         return 1;
     }
 
@@ -249,6 +251,12 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    if (strcmp(filename, "dmesg") == 0) {
+        talk_hid(&cmd, HF2_CMD_DMESG, 0, 0);
+        printf("%s\n", cmd.buf + 4);
+        return 0;
+    }
+
     talk_hid(&cmd, HF2_CMD_INFO, 0, 0);
     printf("INFO: %s\n", cmd.buf + 4);
 
@@ -262,6 +270,10 @@ int main(int argc, char *argv[]) {
     cmd.flashSize = read32(cmd.buf + 12) * cmd.pageSize;
     cmd.msgSize = read32(cmd.buf + 16);
     printf("page size: %d, total: %dkB\n", cmd.pageSize, cmd.flashSize / 1024);
+
+    if (strcmp(filename, "info") == 0) {
+        return 0;
+    }
 
     int i;
     size_t filesize;
