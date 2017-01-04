@@ -134,7 +134,7 @@ void talk_hid(HID_Dev *pkt, int cmd, const void *data, uint32_t len) {
         fatal("invalid status");
 }
 
-uint8_t flashbuf[256 * 1024];
+uint8_t flashbuf[2 * 1024 * 1024];
 
 unsigned short add_crc(char ptr, unsigned short crc) {
     unsigned short cmpt;
@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
         printf("   list             - list devices\n");
         printf("   dmesg            - dump internal runtime logs from the device\n");
         printf("   info             - dump information about the device\n");
-        printf("   write BIN_FILE   - write specified bin file\n");
+        printf("   write FILE       - write specified BIN or UF2 file\n");
         printf("   random           - write randomly generated bin file\n");
         return 1;
     }
@@ -277,6 +277,7 @@ int main(int argc, char *argv[]) {
 
     int i;
     size_t filesize;
+    int isUF2 = 0;
 
     if (strcmp(filename, "random") == 0) {
         srand(millis());
@@ -294,17 +295,35 @@ int main(int argc, char *argv[]) {
             len = fread(flashbuf + filesize, 1, sizeof(flashbuf) - filesize, f);
             filesize += len;
         }
-        filesize = (filesize + (cmd.pageSize - 1)) / cmd.pageSize * cmd.pageSize;
+        if (strncmp((const char *)flashbuf, "UF2\nWQ]\x9E", 8) == 0) {
+            printf("detected UF2 file\n");
+            if (cmd.pageSize != 256)
+                fatal("wrong page size");
+            isUF2 = 1;
+        } else {
+            filesize = (filesize + (cmd.pageSize - 1)) / cmd.pageSize * cmd.pageSize;
+        }
         printf("read %ld bytes from %s\n", filesize, filename);
         fclose(f);
     }
 
     uint64_t start = millis();
+    uint32_t addr = 0x2000;
+    uint32_t blockSize = cmd.pageSize;
 
-    for (i = 0; i < filesize; i += cmd.pageSize) {
-        write32(cmd.buf + 8, i + 0x2000);
-        memcpy(cmd.buf + 12, flashbuf + i, cmd.pageSize);
+    if (isUF2)
+        blockSize = 512;
+
+    for (i = 0; i < filesize; i += blockSize) {
+        if (isUF2) {
+            addr = read32(flashbuf + i + 12);
+            memcpy(cmd.buf + 12, flashbuf + i + 32, cmd.pageSize);
+        } else {
+            memcpy(cmd.buf + 12, flashbuf + i, cmd.pageSize);
+        }
+        write32(cmd.buf + 8, addr);
         talk_hid(&cmd, HF2_CMD_WRITE_FLASH_PAGE, 0, cmd.pageSize + 4);
+        addr += cmd.pageSize;
     }
 
     printf("time: %d\n", (int)(millis() - start));
@@ -321,7 +340,8 @@ int main(int argc, char *argv[]) {
         }
     }
 #else
-    verify(&cmd, flashbuf, filesize, 0x2000);
+    if (!isUF2)
+        verify(&cmd, flashbuf, filesize, 0x2000);
 #endif
 
     printf("verify time: %d\n", (int)(millis() - start));
