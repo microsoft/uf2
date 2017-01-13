@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
         printf("   list             - list devices\n");
         printf("   dmesg            - dump internal runtime logs from the device\n");
         printf("   info             - dump information about the device\n");
-        printf("   write FILE       - write specified BIN or UF2 file\n");
+        printf("   FILE             - write specified BIN or UF2 file\n");
         printf("   random           - write randomly generated bin file\n");
         return 1;
     }
