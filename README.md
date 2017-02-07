@@ -155,7 +155,6 @@ This way, the info file can be found in the initial section of the `CURRENT.UF2`
 file as well. Thus, a board type can be determined from the contents of `CURRENT.UF2`.
 This is particularly useful with the source embedding (see above).
 
-
 ## License
 
 MIT

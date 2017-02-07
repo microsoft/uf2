@@ -281,7 +281,7 @@ int main(int argc, char *argv[]) {
 
     if (strcmp(filename, "random") == 0) {
         srand(millis());
-        filesize = 64 * 1024;
+        filesize = 230 * 1024;
         for (i = 0; i < filesize; ++i)
             flashbuf[i] = rand();
     } else {
