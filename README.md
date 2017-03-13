@@ -3,6 +3,8 @@
 UF2 is a file format, developed by Microsoft for [PXT](https://github.com/Microsoft/pxt), 
 that is particularly suitable for flashing devices over MSC (Mass Storage Class; aka removable flash drive).
 
+## Overview
+
 The file consists of 512 byte blocks, each of which is self-contained and independent of others. 
 Each 512 byte block consists of (see below for details):
 * magic numbers at the beginning and at the end
@@ -106,7 +108,7 @@ If the bootloader can expose `CURRENT.UF2` file (see below) and there is enough
 flash available, than the second option is more desirable, as it allows sharing
 programs directly from the board.
 
-See https://www.pxt.io/source-embedding for more info.
+See https://makecode.com/source-embedding for more info.
 
 ### Robustness
 
@@ -155,10 +157,19 @@ This way, the info file can be found in the initial section of the `CURRENT.UF2`
 file as well. Thus, a board type can be determined from the contents of `CURRENT.UF2`.
 This is particularly useful with the source embedding (see above).
 
+## Implementations
+
+### Bootloaders
+
+* [SAMD21](https://github.com/Microsoft/uf2-samd21)
+
+### Editors
+
+* https://makecode.adafruit.com
+
 ## License
 
 MIT
-
 
 ## Code of Conduct
 
