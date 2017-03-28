@@ -1,11 +1,10 @@
 # USB Flashing Format (UF2)
 
-UF2 is a file format, developed by Microsoft for [PXT](https://github.com/Microsoft/pxt), 
-that is particularly suitable for flashing devices over MSC (Mass Storage Class; aka removable flash drive).
+UF2 is a file format, developed by Microsoft for [PXT](https://github.com/Microsoft/pxt) (also known as [Microsoft MakeCode](https://makecode.com)), that is particularly suitable for flashing microcontrollers over MSC (Mass Storage Class; aka removable flash drive).
 
 ## Overview
 
-The file consists of 512 byte blocks, each of which is self-contained and independent of others. 
+The UF2 file consists of 512 byte blocks, each of which is self-contained and independent of others. 
 Each 512 byte block consists of (see below for details):
 * magic numbers at the beginning and at the end
 * address where the data should be flashed
