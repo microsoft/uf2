@@ -113,8 +113,8 @@ See https://makecode.com/source-embedding for more info.
 
 The file format is designed specifically to deal with the following problems:
 
-* operating system (OS) writing blocks not in order the blocks occur in a file
-* OS writing some blocks multiple times
+* operating system (OS) writing blocks in different order than occurs in a file
+* OS writing blocks multiple times
 * OS writing data that is not UF2 blocks
 * OS writing first/final part of a block, possibly for metadata detection or search indexing
 
@@ -146,11 +146,11 @@ Model: Arduino Zero
 Board-ID: SAMD21G18A-Zero-v0
 ```
 
-The `Board-ID` field is machine-readable and consists from a number of dash-separated tokens.
+The `Board-ID` field is machine-readable and consists of a number of dash-separated tokens.
 The first token is the CPU type, second is the board type, and third is the board revision.
 More tokens can be also added.
 
-Bootloader should contain its info file as a static string somewhere in its code.
+The bootloader should contain its info file as a static string somewhere in its code.
 If possible, the last word of the bootloader code should point to this string.
 This way, the info file can be found in the initial section of the `CURRENT.UF2`
 file as well. Thus, a board type can be determined from the contents of `CURRENT.UF2`.
