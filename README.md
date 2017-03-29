@@ -8,7 +8,7 @@ The UF2 file consists of 512 byte blocks, each of which is self-contained and in
 Each 512 byte block consists of (see below for details):
 * magic numbers at the beginning and at the end
 * address where the data should be flashed
-* up 476 bytes of data
+* up to 476 bytes of data
 
 The data transfers over MSC always arrive in multiples of 512 bytes.
 Together with the FAT file system structure, this means that blocks of the
