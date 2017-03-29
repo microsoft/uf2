@@ -58,12 +58,12 @@ of final magic number, which was forced to be `'\n'` (`0xA`). Together with the
 first magic number being `"UF2\n"` this makes it easy to identify UF2 blocks in
 a text editor.
 
-The header was padded to 32 bytes, as hex editors commonly use 16 or 32 bytes
+The header is padded to 32 bytes, as hex editors commonly use 16 or 32 bytes
 as line length.  This way, the data payload is aligned to line start.
 
 32 bit integers are used for all fields so that large flash sizes can be
 supported in future, as well as for simplicity. Little endian is used, as most
-of microcontroller are little endian. 8 bit microcontrollers can choose to just
+microcontrollers are little endian. 8 bit microcontrollers can choose to just
 use the first 16 bits of various header fields.
 
 The total number of blocks in the file and the sequential block number make it
@@ -74,29 +74,29 @@ after say 1 second break in incoming UF2 blocks.
 
 ### Payload sizes
 
-Number of data bytes is configurable and depends on the size of
-flash page (that is the smallest size that can be erased) on the
+The number of data bytes is configurable and depends on the size of
+the flash page (that is the smallest size that can be erased) on the
 microcontroller.
 
 * if the page size is more than `476` bytes, the bootloader should support
-  any payload sizes, as it needs to buffer the entire page in memory anyway
-* if the page size is less than `476` bytes, then payload should be a multiple
+  any payload size, as it needs to buffer the entire page in memory anyway
+* if the page size is less than `476` bytes, the payload should be a multiple
   of page size, so it can be written without buffering; the target address
   should also be a multiple of page size
 
-In any event, payload size and target address should be always 4-byte aligned.
+In any event, payload size and target address should always be 4-byte aligned.
 
 Note that payload size of `256` is always correct, and makes it easy to convert
 between flash addresses and UF2 file offsets.
 
 For example, on Atmel's SAMD21 chips the page size is `256` bytes, and this 
-also the payload size used. If the page size was `128` bytes, one could use
+also is the payload size. If the page size was `128` bytes, one could use
 payload of `128*3`. Nordic nRF51 has page size of `1024` bytes, and thus 
-any payload sizes should be allowed.
+any payload size should be allowed.
 
 ### Embedding sources
 
-Some IDEs will embed the sources in the UF2 file. This allows a UF2 files to be
+Some IDEs will embed program sources in the UF2 file. This allows a UF2 files to be
 loaded by the IDE and serve as a natural backup and transfer format.
 This can be done in two ways:
 
