@@ -1,6 +1,10 @@
 # USB Flashing Format (UF2)
 
-UF2 is a file format, developed by Microsoft for [PXT](https://github.com/Microsoft/pxt) (also known as [Microsoft MakeCode](https://makecode.com)), that is particularly suitable for flashing microcontrollers over MSC (Mass Storage Class; aka removable flash drive).
+UF2 is a file format, developed by Microsoft for [PXT](https://github.com/Microsoft/pxt) 
+(also known as [Microsoft MakeCode](https://makecode.com)), that is particularly suitable for 
+flashing microcontrollers over MSC (Mass Storage Class; aka removable flash drive).
+
+For a more friendly explanation, check out [this blog post](https://makecode.com/blog/one-chip-to-flash-them-all).
 
 ## Overview
 
