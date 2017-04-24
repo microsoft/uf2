@@ -6,6 +6,8 @@ flashing microcontrollers over MSC (Mass Storage Class; aka removable flash driv
 
 For a more friendly explanation, check out [this blog post](https://makecode.com/blog/one-chip-to-flash-them-all).
 
+For source code, see the implementation of [UF2 in a SAMD21 bootloader](https://github.com/Microsoft/uf2-samd21)
+
 ## Overview
 
 The UF2 file consists of 512 byte blocks, each of which is self-contained and independent of others. 
