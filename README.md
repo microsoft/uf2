@@ -43,17 +43,37 @@ All fields, except for data, are 32 bit unsigned little endian integers.
 | 16     | 4    | Number of bytes used in data (often 256)          |
 | 20     | 4    | Sequential block number; starts at 0              |
 | 24     | 4    | Total number of blocks in file                    |
-| 28     | 4    | Reserved; should be 0                             |
+| 28     | 4    | File size or reserved (write as zero)             |
 | 32     | 476  | Data, padded with zeros                           |
 | 508    | 4    | Final magic number, `0x0AB16F30`                  |
 
+The following C struct can be used:
+
+```C
+struct UF2_Block {
+    // 32 byte header
+    uint32_t magicStart0;
+    uint32_t magicStart1;
+    uint32_t flags;
+    uint32_t targetAddr;
+    uint32_t payloadSize;
+    uint32_t blockNo;
+    uint32_t numBlocks;
+    uint32_t fileSize;
+    uint8_t data[476];
+    uint32_t magicEnd;
+} UF2_Block;
+```
+
 ### Flags
 
-Currently, only one flag is defined:
+Currently, there are two flags is defined:
 
 * `0x00000001` - **do not flash** - this block should be skipped when writing the
   device flash; it can be used to store "comments" in the file, typically
   embedded source code or debug info that does not fit on the device flash
+
+* `0x00001000` - **file container** - see below
 
 ### Rationale
 
@@ -142,8 +162,10 @@ bootloaders.
 * `CURRENT.UF2` - the contents of the entire flash of the device, starting at `0x00000000`, with `256` payload size;
   thus, the size of this file will report as twice the size of flash
 
-Flashing tools can use the presence of `INFO_UF2.TXT` file as an indication that
-a given directory is actually a connected UF2 board.
+Flashing tools can use the presence of `INFO_UF2.TXT` (in upper or lower case,
+as FAT is case-insensitive) file as an indication that a given directory is
+actually a connected UF2 board. The other files should not be used for
+detection.
 
 Typical `INFO_UF2.TXT` file looks like this:
 ```
@@ -161,6 +183,44 @@ If possible, the last word of the bootloader code should point to this string.
 This way, the info file can be found in the initial section of the `CURRENT.UF2`
 file as well. Thus, a board type can be determined from the contents of `CURRENT.UF2`.
 This is particularly useful with the source embedding (see above).
+
+## File containers
+
+It is also possible to use the UF2 format as a container for one or more
+regular files (akin to a TAR file, or ZIP archive without compression).  This
+is useful when the embedded device being flashed runs some sort of operating
+system with file support.
+
+In such a usage the `file container` flag is set on blocks, the field `fileSize`
+ holds the file size of the current file, and the field `targetAddr` holds the
+offset in current file.
+
+The file name is stored at `&data[payloadSize]` (ie., right after the actual payload) and
+terminated with a `0x00` byte.  The format of filename is dependent on the
+bootloader (usually implemented as some sort of file system daemon). 
+
+The bootloader will usually allow any size of the payload.
+
+The current files on device might be exposed as multiple UF2 files, instead of
+a single `CURRENT.UF2`. They may reside in directories, however file names
+stored in UF2 packets are insensitive to the directory there were read from, or
+written to.
+
+Typical writing procedure is as follows:
+* validate UF2 magic numbers
+* make sure that `targetAddr < fileSize` and that `fileSize` isn't out of reasonable range
+* write `0x00` at `data[475]` to ensure NUL termination of file name
+* read file name from `&data[payloadSize]`; perform any mapping on the file name
+* create a directory where the file is to be written if doesn't exists
+* open the file for writing
+* truncate the file to `fileSize`
+* seek `targetAddr`
+* write the payload (ie., `data[0 ... payloadSize - 1]`)
+* close the file
+
+The fields `blockNo` and `numBlocks` refer to the entire UF2 file, not the current
+file.
+
 
 ## Implementations
 
