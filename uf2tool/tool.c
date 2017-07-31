@@ -11,6 +11,8 @@
 #include "hidapi.h"
 #include "uf2hid.h"
 
+#define EP_SIZE 64
+
 typedef struct {
     hid_device *dev;
     uint16_t size;
@@ -53,14 +55,14 @@ uint32_t read32(uint8_t *ptr) { return ptr[0] | (ptr[1] << 8) | (ptr[2] << 16) |
 uint32_t read16(uint8_t *ptr) { return ptr[0] | (ptr[1] << 8); }
 
 int recv_hid(HID_Dev *pkt, int timeout) {
-    uint8_t buf0[65];
+    uint8_t buf0[EP_SIZE + 1];
     uint8_t *buf;
 
     pkt->size = 0;
     memset(pkt->buf, 0, sizeof(pkt->buf));
 
     for (;;) {
-        int sz = hid_read_timeout(pkt->dev, buf0, 65, timeout);
+        int sz = hid_read_timeout(pkt->dev, buf0, sizeof(buf0), timeout);
         if (sz <= 0) {
             if (timeout < 0)
                 fatal("read error");
@@ -91,21 +93,21 @@ int recv_hid(HID_Dev *pkt, int timeout) {
 }
 
 void send_hid(hid_device *dev, const void *data, int size) {
-    uint8_t buf[65] = {0};
+    uint8_t buf[EP_SIZE + 1] = {0};
     const uint8_t *ptr = data;
 
     for (;;) {
         int s;
-        if (size <= 63) {
+        if (size <= EP_SIZE - 1) {
             s = size;
             buf[1] = HF2_FLAG_CMDPKT_LAST | size;
         } else {
-            s = 63;
-            buf[1] = HF2_FLAG_CMDPKT_BODY | 63;
+            s = EP_SIZE - 1;
+            buf[1] = HF2_FLAG_CMDPKT_BODY | (EP_SIZE - 1);
         }
         memcpy(buf + 2, ptr, s);
-        int sz = hid_write(dev, buf, 65);
-        if (sz != 65)
+        int sz = hid_write(dev, buf, EP_SIZE + 1);
+        if (sz != EP_SIZE + 1)
             fatal("write error");
         ptr += s;
         size -= s;
@@ -173,14 +175,14 @@ void verify(HID_Dev *cmd, uint8_t *buf, int size, int offset) {
 }
 
 void *forward_stdin(void *cmd0) {
-    uint8_t buf[65];
+    uint8_t buf[EP_SIZE + 1];
     HID_Dev *cmd = cmd0;
     for (;;) {
-        memset(buf, 0, 65);
-        int sz = read(0, buf + 2, 63);
+        memset(buf, 0, sizeof(buf));
+        int sz = read(0, buf + 2, EP_SIZE - 1);
         if (sz > 0) {
             buf[1] = HF2_FLAG_SERIAL_OUT | sz;
-            hid_write(cmd->dev, buf, 65);
+            hid_write(cmd->dev, buf, EP_SIZE + 1);
         }
         if (sz == 0)
             break;
