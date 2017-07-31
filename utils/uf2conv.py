@@ -20,6 +20,12 @@ def isUF2(buf):
     w = struct.unpack("<II", buf[0:8])
     return w[0] == UF2_MAGIC_START0 and w[1] == UF2_MAGIC_START1
 
+def isHEX(buf):
+    w = buf[0:30]
+    if w[0] == ':' and re.match("^[:0-9a-fA-F\r\n]+$", buf):
+        return True
+    return False
+
 def convertFromUF2(buf):
     numblocks = len(buf) / 512
     curraddr = None
@@ -74,6 +80,61 @@ def convertToUF2(fileContent):
         outp += block
     return outp
 
+class Block:
+    def __init__(self, addr):
+        self.addr = addr
+        self.bytes = []
+        for i in range(0, 256):
+            self.bytes.append(0)
+
+    def encode(self, blockno, numblocks):
+        hd = struct.pack("<IIIIIIII",  
+            UF2_MAGIC_START0, UF2_MAGIC_START1, 
+            0, self.addr, 256, blockno, numblocks, 0)
+        for i in range(0, 256):
+            hd += chr(self.bytes[i])
+        while len(hd) < 512 - 4:
+            hd += "\x00"
+        hd += struct.pack("<I", UF2_MAGIC_END)
+        return hd
+      
+def convertFromHexToUF2(buf):
+    upper = 0
+    currblock = None
+    blocks = []
+    for line in buf.split('\n'):
+        if line[0] != ":":
+            continue
+        i = 1
+        rec = []
+        while i < len(line) - 1:
+            rec.append(int(line[i:i+2], 16))
+            i += 2
+        tp = rec[3]
+        if tp == 4:
+            upper = ((rec[4] << 8) | rec[5]) << 16
+        elif tp == 2:
+            upper = rec[4] << 16
+            assert rec[5] == 0
+        elif tp == 1:
+            break
+        elif tp == 0:
+            addr = upper | (rec[1] << 8) | rec[2]
+            i = 4
+            while i < len(rec) - 1:
+                if not currblock or currblock.addr & ~0xff != addr & ~0xff:
+                    currblock = Block(addr & ~0xff)
+                    blocks.append(currblock)
+                currblock.bytes[addr & 0xff] = rec[i]
+                addr += 1
+                i += 1
+    numblocks = len(blocks)
+    resfile = ""
+    for i in range(0, numblocks):
+        resfile += blocks[i].encode(i, numblocks)
+    return resfile
+
+
 def getdrives():
     drives = []
     if sys.platform == "win32":
@@ -122,10 +183,10 @@ def main():
         sys.exit(1)
     parser = argparse.ArgumentParser(description='Convert to UF2 or flash directly.')
     parser.add_argument('input', metavar='INPUT', type=str, nargs='?', 
-                        help='input file (BIN or UF2)')
+                        help='input file (HEX, BIN or UF2)')
     parser.add_argument('-b' , '--base', dest='base', type=str,
                         default="0x2000",
-                        help='set base address of application (default: 0x2000)')
+                        help='set base address of application for BIN format (default: 0x2000)')
     parser.add_argument('-o' , '--output', metavar="FILE", dest='output', type=str,
                         help='write output to named file; defaults to "flash.uf2" or "flash.bin" where sensible')
     parser.add_argument('-d' , '--device', dest="device_path",
@@ -148,6 +209,8 @@ def main():
         if fromUF2:
             outbuf = convertFromUF2(inpbuf)
             ext = "bin"
+        elif isHEX(inpbuf):
+            outbuf = convertFromHexToUF2(inpbuf)
         else:
             outbuf = convertToUF2(inpbuf)
         print "Converting to %s, output size: %d, start address: 0x%x" % (ext, len(outbuf), appstartaddr)
