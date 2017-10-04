@@ -194,7 +194,7 @@ void serial(HID_Dev *cmd) {
     pthread_t stdinFwd;
     pthread_create(&stdinFwd, NULL, forward_stdin, cmd);
     for (;;) {
-        if (recv_hid(cmd, 10)) {
+        if (recv_hid(cmd, -1)) {
             if (cmd->serial)
                 write(cmd->serial, cmd->buf, cmd->size);
         }
