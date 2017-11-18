@@ -69,7 +69,7 @@ struct UF2_Block {
 
 Currently, there are two flags is defined:
 
-* `0x00000001` - **do not flash** - this block should be skipped when writing the
+* `0x00000001` - **not main flash** - this block should be skipped when writing the
   device flash; it can be used to store "comments" in the file, typically
   embedded source code or debug info that does not fit on the device flash
 
@@ -126,7 +126,7 @@ Some IDEs will embed program sources in the UF2 file. This allows a UF2 files to
 loaded by the IDE and serve as a natural backup and transfer format.
 This can be done in two ways:
 
-* using the "do not flash" flag
+* using the "not main flash" flag
 * using normal blocks that are flashed to the device
 
 If the bootloader can expose `CURRENT.UF2` file (see below) and there is enough
@@ -188,12 +188,15 @@ This is particularly useful with the source embedding (see above).
 
 It is also possible to use the UF2 format as a container for one or more
 regular files (akin to a TAR file, or ZIP archive without compression).  This
-is useful when the embedded device being flashed runs some sort of operating
-system with file support.
+is useful when the embedded device being flashed sports a file system.
+
+The program to run may reside in one of the files, or in the main flash memory.
 
 In such a usage the `file container` flag is set on blocks, the field `fileSize`
- holds the file size of the current file, and the field `targetAddr` holds the
+holds the file size of the current file, and the field `targetAddr` holds the
 offset in current file.
+
+The `not main flash` flag on blocks should be ignored when the `file container` is set.
 
 The file name is stored at `&data[payloadSize]` (ie., right after the actual payload) and
 terminated with a `0x00` byte.  The format of filename is dependent on the
@@ -202,9 +205,8 @@ bootloader (usually implemented as some sort of file system daemon).
 The bootloader will usually allow any size of the payload.
 
 The current files on device might be exposed as multiple UF2 files, instead of
-a single `CURRENT.UF2`. They may reside in directories, however file names
-stored in UF2 packets are insensitive to the directory there were read from, or
-written to.
+a single `CURRENT.UF2`. They may reside in directories, however, due to UF2 general
+design, it doesn't matter which directory the UF2 file is written to.
 
 Typical writing procedure is as follows:
 * validate UF2 magic numbers
@@ -221,16 +223,20 @@ Typical writing procedure is as follows:
 The fields `blockNo` and `numBlocks` refer to the entire UF2 file, not the current
 file.
 
-
 ## Implementations
 
 ### Bootloaders
 
 * [SAMD21](https://github.com/Microsoft/uf2-samd21)
+* [Arduino UNO](https://github.com/mmoskal/uf2-uno)
+
+There's an ongoing effort to implement UF2 in [Codal](https://github.com/lancaster-university/codal-core), see `msc` branch.
 
 ### Editors
 
 * https://makecode.adafruit.com
+* https://makecode.seeedstudio.com
+* https://makecode.sparkfun.com
 
 ## License
 
