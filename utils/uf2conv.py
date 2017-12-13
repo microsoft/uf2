@@ -27,6 +27,7 @@ def isHEX(buf):
     return False
 
 def convertFromUF2(buf):
+    global appstartaddr
     numblocks = len(buf) / 512
     curraddr = None
     outp = ""
