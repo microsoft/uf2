@@ -100,6 +100,8 @@ class Block:
         return hd
       
 def convertFromHexToUF2(buf):
+    global appstartaddr
+    appstartaddr = None
     upper = 0
     currblock = None
     blocks = []
@@ -115,12 +117,14 @@ def convertFromHexToUF2(buf):
         if tp == 4:
             upper = ((rec[4] << 8) | rec[5]) << 16
         elif tp == 2:
-            upper = rec[4] << 16
-            assert rec[5] == 0
+            upper = ((rec[4] << 8) | rec[5]) << 4
+            assert (upper & 0xffff) == 0
         elif tp == 1:
             break
         elif tp == 0:
             addr = upper | (rec[1] << 8) | rec[2]
+            if appstartaddr == None:
+                appstartaddr = addr
             i = 4
             while i < len(rec) - 1:
                 if not currblock or currblock.addr & ~0xff != addr & ~0xff:
