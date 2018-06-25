@@ -43,7 +43,7 @@ All fields, except for data, are 32 bit unsigned little endian integers.
 | 16     | 4    | Number of bytes used in data (often 256)          |
 | 20     | 4    | Sequential block number; starts at 0              |
 | 24     | 4    | Total number of blocks in file                    |
-| 28     | 4    | File size or reserved (write as zero)             |
+| 28     | 4    | File size or board family ID or zero              |
 | 32     | 476  | Data, padded with zeros                           |
 | 508    | 4    | Final magic number, `0x0AB16F30`                  |
 
@@ -59,7 +59,7 @@ struct UF2_Block {
     uint32_t payloadSize;
     uint32_t blockNo;
     uint32_t numBlocks;
-    uint32_t fileSize;
+    uint32_t fileSize; // or familyID;
     uint8_t data[476];
     uint32_t magicEnd;
 } UF2_Block;
@@ -72,8 +72,34 @@ Currently, there are two flags is defined:
 * `0x00000001` - **not main flash** - this block should be skipped when writing the
   device flash; it can be used to store "comments" in the file, typically
   embedded source code or debug info that does not fit on the device flash
-
 * `0x00001000` - **file container** - see below
+* `0x00002000` - **familyID present** - when set, the `fileSize/familyID` holds a value
+  identifying the board family (usually corresponds to an MCU)
+
+### Family ID
+
+This field is optional, and should be set only when the corresponding
+flag is set. It is recommended that new bootloaders require the field to
+be set appropriately, and refuse to flash UF2 files without it.
+If you're developing your own bootloader, and your
+board family isn't listed here, pick a new family ID at random. It's good
+to also send a PR here, so your family can be listed.
+
+#### Picking numbers at random
+
+The reason to pick numbers at random is to minimize risk of collisions
+in the wild. Do not pick random numbers by banging on keyboard, or by using
+`0xdeadf00d`, `0x42424242` etc. A good way is to use the following
+shell command: `printf "0x%04x%04x\n" $RANDOM $RANDOM`
+
+#### Family list
+
+* SAMD21 - 0x68ed2b88
+* SAMD51 - 0x55114460
+* NRF52 - 0x1b57745f
+* STM32F1 - 0x5ee21072
+* STM32F4 - 0x57755a57
+* ATmega32 - 0x16573617
 
 ### Rationale
 
@@ -229,6 +255,9 @@ file.
 
 * [SAMD21](https://github.com/Microsoft/uf2-samd21)
 * [Arduino UNO](https://github.com/mmoskal/uf2-uno)
+* [STM32](https://github.com/mmoskal/uf2-stm32f)
+* [NRF52840](https://github.com/adafruit/Adafruit_nRF52840_Bootloader)
+* [Linux (RPi Zero)](https://github.com/microsoft/uf2-linux)
 
 There's an ongoing effort to implement UF2 in [Codal](https://github.com/lancaster-university/codal-core), see `msc` branch.
 
