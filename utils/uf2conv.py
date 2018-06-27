@@ -12,9 +12,19 @@ UF2_MAGIC_START0 = 0x0A324655 # "UF2\n"
 UF2_MAGIC_START1 = 0x9E5D5157 # Randomly selected
 UF2_MAGIC_END    = 0x0AB16F30 # Ditto
 
+families = {
+    'SAMD21': 0x68ed2b88,
+    'SAMD51': 0x55114460,
+    'NRF52': 0x1b57745f,
+    'STM32F1': 0x5ee21072,
+    'STM32F4': 0x57755a57,
+    'ATMEGA32': 0x16573617,
+}
+
 INFO_FILE = "/INFO_UF2.TXT"
 
 appstartaddr = 0x2000
+familyid = 0x0
 
 def isUF2(buf):
     w = struct.unpack("<II", buf[0:8])
@@ -63,6 +73,7 @@ def convertFromUF2(buf):
     return outp
 
 def convertToUF2(fileContent):
+    global familyid
     datapadding = ""
     while len(datapadding) < 512 - 256 - 32 - 4:
         datapadding += "\x00\x00\x00\x00"
@@ -71,9 +82,12 @@ def convertToUF2(fileContent):
     for blockno in range(0, numblocks):
         ptr = 256 * blockno
         chunk = fileContent[ptr:ptr + 256]
+        flags = 0x0
+        if familyid:
+            flags |= 0x2000
         hd = struct.pack("<IIIIIIII",  
             UF2_MAGIC_START0, UF2_MAGIC_START1, 
-            0, ptr + appstartaddr, 256, blockno, numblocks, 0)
+            flags, ptr + appstartaddr, 256, blockno, numblocks, familyid)
         while len(chunk) < 256:
             chunk += "\x00"
         block = hd + chunk + datapadding + struct.pack("<I", UF2_MAGIC_END)
@@ -89,9 +103,13 @@ class Block:
             self.bytes.append(0)
 
     def encode(self, blockno, numblocks):
+        global familyid
+        flags = 0x0
+        if familyid:
+            flags |= 0x2000
         hd = struct.pack("<IIIIIIII",  
             UF2_MAGIC_START0, UF2_MAGIC_START1, 
-            0, self.addr, 256, blockno, numblocks, 0)
+            flags, self.addr, 256, blockno, numblocks, familyid)
         for i in range(0, 256):
             hd += chr(self.bytes[i])
         while len(hd) < 512 - 4:
@@ -182,7 +200,7 @@ def writeFile(name, buf):
     print "Wrote %d bytes to %s." % (len(buf), name)
 
 def main():
-    global appstartaddr
+    global appstartaddr, familyid
     def error(msg):
         print msg
         sys.exit(1)
@@ -200,8 +218,20 @@ def main():
                         help='list connected devices')
     parser.add_argument('-c' , '--convert', action='store_true',
                         help='do not flash, just convert')
+    parser.add_argument('-f' , '--family', dest='family', type=str,
+                        default="0x0",
+                        help='specify familyID - number or name (default: 0x0)')
     args = parser.parse_args()
     appstartaddr = int(args.base, 0)
+
+    if args.family.upper() in families:
+        familyid = families[args.family.upper()]
+    else:
+        try:
+            familyid = int(args.family, 0)
+        except ValueError:
+            error("Family ID needs to be a number or one of: " + ", ".join(families.keys()))
+
     if args.list:
         listdrives()
     else:
