@@ -38,7 +38,7 @@ def isHEX(buf):
 
 def convertFromUF2(buf):
     global appstartaddr
-    numblocks = len(buf) / 512
+    numblocks = len(buf) >> 9
     curraddr = None
     outp = ""
     for blockno in range(0, numblocks):
@@ -46,7 +46,7 @@ def convertFromUF2(buf):
         block = buf[ptr:ptr + 512]
         hd = struct.unpack("<IIIIIIII", block[0:32])
         if hd[0] != UF2_MAGIC_START0 or hd[1] != UF2_MAGIC_START1:
-            print "Skipping block at " + ptr + "; bad magic"
+            print("Skipping block at " + ptr + "; bad magic")
             continue
         if hd[2] & 1:
             # NO-flash flag set; skip block
@@ -67,18 +67,18 @@ def convertFromUF2(buf):
             assert False, "Non-word padding size at " + ptr
         while padding > 0:
             padding -= 4
-            outp += "\x00\x00\x00\x00"
+            outp += b"\x00\x00\x00\x00"
         outp += block[32 : 32 + datalen]
         curraddr = newaddr + datalen
     return outp
 
 def convertToUF2(fileContent):
     global familyid
-    datapadding = ""
+    datapadding = b""
     while len(datapadding) < 512 - 256 - 32 - 4:
-        datapadding += "\x00\x00\x00\x00"
-    numblocks = (len(fileContent) + 255) / 256
-    outp = ""
+        datapadding += b"\x00\x00\x00\x00"
+    numblocks = (len(fileContent) + 255) >> 8
+    outp = b""
     for blockno in range(0, numblocks):
         ptr = 256 * blockno
         chunk = fileContent[ptr:ptr + 256]
@@ -89,7 +89,7 @@ def convertToUF2(fileContent):
             UF2_MAGIC_START0, UF2_MAGIC_START1, 
             flags, ptr + appstartaddr, 256, blockno, numblocks, familyid)
         while len(chunk) < 256:
-            chunk += "\x00"
+            chunk += b"\x00"
         block = hd + chunk + datapadding + struct.pack("<I", UF2_MAGIC_END)
         assert len(block) == 512
         outp += block
@@ -113,7 +113,7 @@ class Block:
         for i in range(0, 256):
             hd += chr(self.bytes[i])
         while len(hd) < 512 - 4:
-            hd += "\x00"
+            hd += b"\x00"
         hd += struct.pack("<I", UF2_MAGIC_END)
         return hd
       
@@ -192,17 +192,17 @@ def boardID(path):
  
 def listdrives():
     for d in getdrives():
-        print d, boardID(d)
+        print(d, boardID(d))
 
 def writeFile(name, buf):
     with open(name, "wb") as f:
         f.write(buf)
-    print "Wrote %d bytes to %s." % (len(buf), name)
+    print("Wrote %d bytes to %s." % (len(buf), name))
 
 def main():
     global appstartaddr, familyid
     def error(msg):
-        print msg
+        print(msg)
         sys.exit(1)
     parser = argparse.ArgumentParser(description='Convert to UF2 or flash directly.')
     parser.add_argument('input', metavar='INPUT', type=str, nargs='?', 
@@ -248,7 +248,7 @@ def main():
             outbuf = convertFromHexToUF2(inpbuf)
         else:
             outbuf = convertToUF2(inpbuf)
-        print "Converting to %s, output size: %d, start address: 0x%x" % (ext, len(outbuf), appstartaddr)
+        print("Converting to %s, output size: %d, start address: 0x%x" % (ext, len(outbuf), appstartaddr))
 
         if args.convert:
             drives = []
@@ -263,7 +263,7 @@ def main():
             if len(drives) == 0:
                 error("No drive to deploy.")
         for d in drives:
-            print "Flashing %s (%s)" % (d, boardID(d))
+            print("Flashing %s (%s)" % (d, boardID(d)))
             writeFile(outbuf, d + "/NEW.UF2")
 
 if __name__ == "__main__":
