@@ -32,8 +32,11 @@ def is_uf2(buf):
     return w[0] == UF2_MAGIC_START0 and w[1] == UF2_MAGIC_START1
 
 def is_hex(buf):
-    w = buf[0:30]
-    if w[0] == ':' and re.match("^[:0-9a-fA-F\r\n]+$", buf):
+    try:
+        w = buf[0:30].decode("utf-8")
+    except UnicodeDecodeError:
+        return False
+    if w[0] == ':' and re.match(b"^[:0-9a-fA-F\r\n]+$", buf):
         return True
     return False
 
@@ -100,9 +103,7 @@ def convert_to_uf2(file_content):
 class Block:
     def __init__(self, addr):
         self.addr = addr
-        self.bytes = []
-        for i in range(0, 256):
-            self.bytes.append(0)
+        self.bytes = bytearray(256)
 
     def encode(self, blockno, numblocks):
         global familyid
@@ -112,10 +113,9 @@ class Block:
         hd = struct.pack("<IIIIIIII",
             UF2_MAGIC_START0, UF2_MAGIC_START1,
             flags, self.addr, 256, blockno, numblocks, familyid)
-        for i in range(0, 256):
-            hd += chr(self.bytes[i])
+        hd += self.bytes[0:256]
         while len(hd) < 512 - 4:
-            hd += "\x00"
+            hd += b"\x00"
         hd += struct.pack("<I", UF2_MAGIC_END)
         return hd
 
@@ -154,7 +154,7 @@ def convert_from_hex_to_uf2(buf):
                 addr += 1
                 i += 1
     numblocks = len(blocks)
-    resfile = ""
+    resfile = b""
     for i in range(0, numblocks):
         resfile += blocks[i].encode(i, numblocks)
     return resfile
@@ -253,7 +253,7 @@ def main():
             outbuf = convert_from_uf2(inpbuf)
             ext = "bin"
         elif is_hex(inpbuf):
-            outbuf = convert_from_hex_to_uf2(inpbuf)
+            outbuf = convert_from_hex_to_uf2(inpbuf.decode("utf-8"))
         else:
             outbuf = convert_to_uf2(inpbuf)
         print("Converting to %s, output size: %d, start address: 0x%x" %
