@@ -100,6 +100,7 @@ shell command: `printf "0x%04x%04x\n" $RANDOM $RANDOM`
 * STM32F1 - 0x5ee21072
 * STM32F4 - 0x57755a57
 * ATmega32 - 0x16573617
+* FX2 - 0x5a18069b
 
 ### Rationale
 
