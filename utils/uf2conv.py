@@ -272,7 +272,7 @@ def main():
                 error("No drive to deploy.")
         for d in drives:
             print("Flashing %s (%s)" % (d, board_id(d)))
-            write_file(outbuf, d + "/NEW.UF2")
+            write_file(d + "/NEW.UF2", outbuf)
 
 
 if __name__ == "__main__":
