@@ -6,7 +6,10 @@ flashing microcontrollers over MSC (Mass Storage Class; aka removable flash driv
 
 For a more friendly explanation, check out [this blog post](https://makecode.com/blog/one-chip-to-flash-them-all).
 
-For source code, see the implementation of [UF2 in a SAMD21 bootloader](https://github.com/Microsoft/uf2-samd21)
+## Implementations
+
+* [UF2 in a Microchip (Atmel) SAMD21 bootloader](https://github.com/Microsoft/uf2-samd21)
+* [UF2 in a Cypress FX2 bootloader](https://github.com/whitequark/libfx2/tree/master/firmware/boot-uf2)
 
 ## Overview
 
