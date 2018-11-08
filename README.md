@@ -260,7 +260,7 @@ file.
 * [Linux (RPi Zero)](https://github.com/microsoft/uf2-linux)
 * [Cypress FX2](https://github.com/whitequark/libfx2/tree/master/firmware/boot-uf2)
 
-There's an ongoing effort to implement UF2 in [Codal](https://github.com/lancaster-university/codal-core), see `msc` branch.
+There's an ongoing effort to implement UF2 in [Codal](https://github.com/lancaster-university/codal-core).
 
 ### Editors
 
