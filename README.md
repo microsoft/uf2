@@ -5,11 +5,7 @@ UF2 is a file format, developed by Microsoft for [PXT](https://github.com/Micros
 flashing microcontrollers over MSC (Mass Storage Class; aka removable flash drive).
 
 For a more friendly explanation, check out [this blog post](https://makecode.com/blog/one-chip-to-flash-them-all).
-
-## Implementations
-
-* [UF2 in a Microchip (Atmel) SAMD21 bootloader](https://github.com/Microsoft/uf2-samd21)
-* [UF2 in a Cypress FX2 bootloader](https://github.com/whitequark/libfx2/tree/master/firmware/boot-uf2)
+Also, take a look at the list of implementations at the bottom of this document.
 
 ## Overview
 
@@ -257,11 +253,12 @@ file.
 
 ### Bootloaders
 
-* [SAMD21](https://github.com/Microsoft/uf2-samd21)
+* [Microchip ATSAMD21](https://github.com/Microsoft/uf2-samd21)
 * [Arduino UNO](https://github.com/mmoskal/uf2-uno)
 * [STM32](https://github.com/mmoskal/uf2-stm32f)
-* [NRF52840](https://github.com/adafruit/Adafruit_nRF52840_Bootloader)
+* [Nordic NRF52840](https://github.com/adafruit/Adafruit_nRF52840_Bootloader)
 * [Linux (RPi Zero)](https://github.com/microsoft/uf2-linux)
+* [Cypress FX2](https://github.com/whitequark/libfx2/tree/master/firmware/boot-uf2)
 
 There's an ongoing effort to implement UF2 in [Codal](https://github.com/lancaster-university/codal-core), see `msc` branch.
 
