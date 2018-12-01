@@ -253,9 +253,10 @@ file.
 
 ### Bootloaders
 
-* [Microchip ATSAMD21](https://github.com/Microsoft/uf2-samd21)
+* [Microchip ATSAMD21 and ATSAMD51](https://github.com/Microsoft/uf2-samdx1)
 * [Arduino UNO](https://github.com/mmoskal/uf2-uno)
-* [STM32](https://github.com/mmoskal/uf2-stm32f)
+* [STM32F103](https://github.com/mmoskal/uf2-stm32)
+* [STM32F4](https://github.com/mmoskal/uf2-stm32f)
 * [Nordic NRF52840](https://github.com/adafruit/Adafruit_nRF52840_Bootloader)
 * [Linux (RPi Zero)](https://github.com/microsoft/uf2-linux)
 * [Cypress FX2](https://github.com/whitequark/libfx2/tree/master/firmware/boot-uf2)
