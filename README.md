@@ -84,12 +84,21 @@ If you're developing your own bootloader, and your
 board family isn't listed here, pick a new family ID at random. It's good
 to also send a PR here, so your family can be listed.
 
+If the `familyID` doesn't match, the bootloader should disregard the
+entire block, including `blockNo` and `numBlocks` fields.
+In particular, writing a full UF2 file with non-matching `familyID`
+should not reset the board.
+This also allows for several files with different `familyID` to be
+simply concatenated together, and the whole resulting file to be copied
+to the device with only one actually being written to flash.
+
 #### Picking numbers at random
 
 The reason to pick numbers at random is to minimize risk of collisions
 in the wild. Do not pick random numbers by banging on keyboard, or by using
 `0xdeadf00d`, `0x42424242` etc. A good way is to use the following
 shell command: `printf "0x%04x%04x\n" $RANDOM $RANDOM`
+This procedure was unfortunately not used for the SAMD51 below.
 
 #### Family list
 
