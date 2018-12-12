@@ -106,7 +106,7 @@ This procedure was unfortunately not used for the SAMD51 below.
 * Microchip (Atmel) SAMD51 - 0x55114460
 * Nordic NRF52840 - 0x1b57745f
 * ST STM32F103 - 0x5ee21072
-* ST STM32F403 - 0x57755a57
+* ST STM32F401 - 0x57755a57
 * Microchip (Atmel) ATmega32 - 0x16573617
 * Cypress FX2 - 0x5a18069b
 
