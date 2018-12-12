@@ -142,6 +142,7 @@ struct HF2_BININFO_Result {
     uint32_t flash_page_size;
     uint32_t flash_num_pages;
     uint32_t max_message_size;
+    uint32_t family_id; // optional
 };
 ```
 
