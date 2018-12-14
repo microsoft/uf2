@@ -76,6 +76,14 @@ def convert_from_uf2(buf):
         curraddr = newaddr + datalen
     return outp
 
+def convert_to_carray(file_content):
+    outp = "const unsigned char bindata[] __attribute__((aligned(16))) = {"
+    for i in range(len(file_content)):
+        if i % 16 == 0:
+            outp += "\n"
+        outp += "0x%02x, " % ord(file_content[i])
+    outp += "\n};\n"
+    return outp
 
 def convert_to_uf2(file_content):
     global familyid
@@ -229,6 +237,8 @@ def main():
     parser.add_argument('-f' , '--family', dest='family', type=str,
                         default="0x0",
                         help='specify familyID - number or name (default: 0x0)')
+    parser.add_argument('-C' , '--carray', action='store_true',
+                        help='convert binary file to a C array, not UF2')
     args = parser.parse_args()
     appstartaddr = int(args.base, 0)
 
@@ -254,6 +264,9 @@ def main():
             ext = "bin"
         elif is_hex(inpbuf):
             outbuf = convert_from_hex_to_uf2(inpbuf.decode("utf-8"))
+        elif args.carray:
+            outbuf = convert_to_carray(inpbuf)
+            ext = "h"
         else:
             outbuf = convert_to_uf2(inpbuf)
         print("Converting to %s, output size: %d, start address: 0x%x" %
