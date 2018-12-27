@@ -173,8 +173,8 @@ def get_drives():
         r = subprocess.check_output(["wmic", "PATH", "Win32_LogicalDisk",
                                      "get", "DeviceID,", "VolumeName,",
                                      "FileSystem,", "DriveType"])
-        for line in r.split('\n'):
-            words = re.split('\s+', line)
+        for line in r.split(b'\n'):
+            words = re.split(b'\s+', line)
             if len(words) >= 3 and words[1] == "2" and words[2] == "FAT":
                 drives.append(words[0])
     else:
