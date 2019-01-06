@@ -54,7 +54,7 @@ function applyPatch() {
         let text = document.getElementById("patch")
         let newcfg = text.value.trim()
         if (!currUF2)
-            log("You have to drop a UF2 file with bootloader above before applying patches.")
+            log("You have to drop a UF2 or BIN file with bootloader above before applying patches.")
         else if (!newcfg)
             log("You didn't give any patch to apply.")
         else {

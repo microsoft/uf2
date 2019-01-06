@@ -198,7 +198,7 @@ const CFG_MAGIC1 = 0x20227a79
 
 function configkeysH() {
     let r = "#ifndef __CONFIGKEYS_H\n#define __CONFIGKEYS_H 1\n\n"
-    
+
     r += "#define CFG_MAGIC0 0x1e9e10f1\n"
     r += "#define CFG_MAGIC1 0x20227a79\n\n"
 
@@ -242,23 +242,43 @@ function readWriteConfig(buf, patch) {
     let cfgLen = 0
     if (patch)
         patch.push(0, 0)
+    let isUF2 = false
+    if (read32(buf, 0) == UF2_MAGIC_START0) {
+        isUF2 = true
+        log("# detected UF2 file")
+    } else {
+        let stackBase = read32(buf, 0)
+        if ((stackBase & 0xff0000ff) == 0x20000000 &&
+            (read32(buf, 4) & 1) == 1) {
+            log("# detected BIN file")
+        } else {
+            err("unknown file format")
+        }
+    }
     for (let off = 0; off < buf.length; off += 512) {
-        if (read32(buf, off) != UF2_MAGIC_START0 ||
-            read32(buf, off + 4) != UF2_MAGIC_START1) {
-            err("invalid data at " + off)
+        let start = 0
+        let payloadLen = 512
+        let addr = off
+
+        if (isUF2) {
+            start = 32
+            if (read32(buf, off) != UF2_MAGIC_START0 ||
+                read32(buf, off + 4) != UF2_MAGIC_START1) {
+                err("invalid data at " + off)
+            }
+            payloadLen = read32(buf, off + 16)
+            addr = read32(buf, off + 12) - 32
         }
 
-        const payloadLen = read32(buf, off + 16)
-
-        for (let i = 32; i < 32 + payloadLen; i += 4) {
+        for (let i = start; i < start + payloadLen; i += 4) {
             if (read32(buf, off + i) == CFG_MAGIC0 &&
                 read32(buf, off + i + 4) == CFG_MAGIC1) {
-                let addr = "0x" + (read32(buf, off + 12) + i - 32).toString(16)
+                let addrS = "0x" + (addr + i).toString(16)
                 if (patchPtr === null) {
-                    log(`# Found CFG DATA at ${addr}`)
+                    log(`# Found CFG DATA at ${addrS}`)
                     patchPtr = -4
                 } else {
-                    log(`# Skipping second CFG DATA at ${addr}`)
+                    log(`# Skipping second CFG DATA at ${addrS}`)
                 }
             }
 

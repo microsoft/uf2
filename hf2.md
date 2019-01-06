@@ -14,8 +14,8 @@ ones, but be less efficient.
 In particular, it is suitable for running over USB HID (Human Interface Device),
 which is widely supported in various operating systems without the need for kernel-space
 drivers. It is also possible to run the protocol over a WebUSB link with either a single
-interrupt endpoint or two bulk endpoints, allowing direct access from supported
-browsers. 
+interrupt endpoint or two bulk endpoints, as well as using just the control pipe,
+allowing direct access from supported browsers. 
 
 ## Raw message format
 
