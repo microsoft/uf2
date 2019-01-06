@@ -7,7 +7,7 @@ function savePatch(ev) {
 
 function restorePatch() {
     let text = document.getElementById("patch")
-    text.value = localStorage["UF2_PATCH"]
+    text.value = localStorage["UF2_PATCH"] || ""
     document.getElementById("apply").onclick = applyPatch
 }
 
