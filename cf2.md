@@ -44,14 +44,57 @@ If you require your own key names, please use
 
 ## The Patcher
 
-At https://microsoft.github.io/uf2/patcher/ we provide a tool, which given a UF2 file
-and a configuration definition, binary-patches the UF2 file and lets the user download it.
-The tool also parses existing configuration information from the UF2 file and show it.
+At https://microsoft.github.io/uf2/patcher/ we provide a tool, which given a UF2 or BIN file
+and a configuration definition, binary-patches the UF2/BIN file and lets the user download it.
+The tool also parses existing configuration information from the UF2/BIN file to show it.
 
-Such tool is to be used by maker of devices.
+Such tool is to be used by makers of devices.
 For example, for MakeCode Arcade, this includes both factories and users who take an existing
 multi-purpose board and connect keys and screen.
 Such user would then download generic MakeCode Arcade bootloader (either a UF2 file,
 which upgrades the bootloader, or a .BIN file with the bootloader) for the given MCU,
 and binary patch it with their configuration.
 Then, they would update the bootloader, and have a Arcade-compatible device.
+
+## Configuration file syntax
+
+Example:
+
+```bash
+# Configuration values for display registers and size
+DISPLAY_CFG0 = 0x80
+DISPLAY_CFG1 = 0x603
+DISPLAY_CFG2 = 0x16
+DISPLAY_HEIGHT = 128
+DISPLAY_WIDTH = 160
+
+PINS_PORT_SIZE = PA_32 # see below
+
+# pin headers (if any)
+PIN_A0 = PA02
+PIN_A1 = PA05
+PIN_A2 = PB08
+PIN_D2 = PA07
+PIN_D3 = PB22
+PIN_SCK = PA01
+PIN_MISO = PB23
+PIN_MOSI = PA00
+
+# pin functions - can use previous definitions, or not
+PIN_BTN_LEFT = PIN_D2
+PIN_BTN_UP = PIN_D3
+PIN_DISPLAY_CS = PB13
+PIN_DISPLAY_SCK = PIN_SCK
+PIN_DISPLAY_MOSI = PIN_MOSI
+
+# custom configuration keys
+_679732427 = 123
+_815320287 = 0x80192
+```
+
+The `PINS_PORT_SIZE` takes one of the following values:
+* `PA_16` - pins are `PA00`-`PA15`, `PB00-PB15`, ..., used on STM32
+* `PA_32` - pins are `PA00`-`PA31`, ... - used on Microchip ATSAMD
+* `P0_16` - pins are `P0_0`-`P0_15`, `P1_0-P1_15`, ... - not used?
+* `P0_32` - pins are `P0_0-P0_32`, ... - used on Nordic NRF
+* `0` or missing - pins are `P_0`, `P_1`, ..., `P_1000`
