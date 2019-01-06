@@ -37,7 +37,8 @@ Data comes as pairs of 32 bit unsigned integers (in machine byte order).
 * finally, a number of zeroes follows (typically at least a few hundred), 
   to store any additional configuration data in future
 
-The file with definitions of key names can be downloaded from the patcher website (see below).
+The file `configkeys.h` with definitions of key names can be downloaded from the 
+patcher website (see below).
 
 If you require your own key names, please use 
 [random large key names](https://github.com/Microsoft/uf2#picking-numbers-at-random).
@@ -61,6 +62,9 @@ Then, they would update the bootloader, and have a Arcade-compatible device.
 Example:
 
 ```bash
+# This is comment, which is ignored
+// this is also a comment
+
 # Configuration values for display registers and size
 DISPLAY_CFG0 = 0x80
 DISPLAY_CFG1 = 0x603
@@ -80,10 +84,10 @@ PIN_SCK = PA01
 PIN_MISO = PB23
 PIN_MOSI = PA00
 
-# pin functions - can use previous definitions, or not
-PIN_BTN_LEFT = PIN_D2
-PIN_BTN_UP = PIN_D3
-PIN_DISPLAY_CS = PB13
+# pin functions
+PIN_BTN_LEFT = PIN_D2        # use pin header name
+PIN_BTN_UP = PB13            # use pin directly
+PIN_DISPLAY_CS = 18          # can even just use a number for the pin
 PIN_DISPLAY_SCK = PIN_SCK
 PIN_DISPLAY_MOSI = PIN_MOSI
 
@@ -92,9 +96,18 @@ _679732427 = 123
 _815320287 = 0x80192
 ```
 
-The `PINS_PORT_SIZE` takes one of the following values:
+The keys are either key names, or underscore followed by a decimal number.
+The values are numbers in either decimal or hexadecimal,
+references to other keys, or pin numbers.
+The way pin numbers are parsed depends on the `PINS_PORT_SIZE`:
 * `PA_16` - pins are `PA00`-`PA15`, `PB00-PB15`, ..., used on STM32
 * `PA_32` - pins are `PA00`-`PA31`, ... - used on Microchip ATSAMD
 * `P0_16` - pins are `P0_0`-`P0_15`, `P1_0-P1_15`, ... - not used?
-* `P0_32` - pins are `P0_0-P0_32`, ... - used on Nordic NRF
+* `P0_32` - pins are `P0_0-P0_31`, ... - used on Nordic NRF
 * `0` or missing - pins are `P_0`, `P_1`, ..., `P_1000`
+
+Certain keys (like `PINS_PORT_SIZE`) have a number of pre-defined values,
+which can be used instead of integers.
+
+For list of keys and predefined values, see `configkeys.h` which can be downloaded
+from the patcher website.
