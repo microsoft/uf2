@@ -111,3 +111,9 @@ which can be used instead of integers.
 
 For list of keys and predefined values, see `configkeys.h` which can be downloaded
 from the patcher website.
+
+## Running from node.js
+
+The patcher tool can be also run from command line.
+Download [patcher.js](https://raw.githubusercontent.com/Microsoft/uf2/master/patcher/patcher.js)
+and run it with node. It will print out help.
