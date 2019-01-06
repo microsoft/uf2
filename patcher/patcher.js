@@ -137,10 +137,10 @@ const enums = {
         CYPRESS_FX2: 0x5a18069b,
     },
     PINS_PORT_SIZE: {
-        PA_16: 16, // PA00-PA15, PB00-PB15, ... - STM32
-        PA_32: 32, // PA00-PA31, ... - ATSAMD
-        P0_16: 1016, // P0_0-P0_15, P1_0-P1_15, ...
-        P0_32: 1032, // P0_0-P0_32, ... - NRF
+        PA_16: 0x10, // PA00-PA15, PB00-PB15, ... - STM32
+        PA_32: 0x20, // PA00-PA31, ... - ATSAMD
+        P0_16: 0x1010, // P0_0-P0_15, P1_0-P1_15, ...
+        P0_32: 0x1020, // P0_0-P0_32, ... - NRF
     },
     DEFAULT_BUTTON_MODE: {
         ACTIVE_HIGH_PULL_DOWN: 0x11,
@@ -208,7 +208,7 @@ function configkeysH() {
     for (let k of Object.keys(enums)) {
         r += "\n"
         for (let kk of Object.keys(enums[k])) {
-            r += `#define ${k}_${kk} ${enums[k][kk]}\n`
+            r += `#define ${k}_${kk} 0x${enums[k][kk].toString(16)}\n`
         }
     }
     r += "\n#endif // __CONFIGKEYS_H\n"
@@ -302,13 +302,16 @@ function lookupCfg(cfgdata, key) {
 }
 
 function pinToString(pinNo, portSize) {
+    if (!portSize)
+        return "P_" + pinNo
+
     let useLetters = true
-    if (portSize > 1000) {
-        portSize = portSize % 1000;
+    let theSize = portSize & 0xfff
+    if (portSize & 0x1000) {
         useLetters = true
     }
-    let port = (pinNo / portSize) | 0
-    let pin = pinNo % portSize
+    let port = (pinNo / theSize) | 0
+    let pin = pinNo % theSize
     if (useLetters) {
         return "P" + String.fromCharCode(65 + port) + ("0" + pin.toString()).slice(-2)
     } else {
@@ -349,8 +352,6 @@ function readConfig(buf) {
     init()
     let cfgdata = readWriteConfig(buf, null)
     let portSize = lookupCfg(cfgdata, configKeys.PINS_PORT_SIZE)
-    //if (portSize === null)
-    //    cfgdata.push(configKeys.PINS_PORT_SIZE, portSize = enums.PINS_PORT_SIZE.PA_16)
     let numentries = cfgdata.length >> 1
     let lines = []
     for (let i = 0; i < numentries; ++i) {
@@ -408,7 +409,7 @@ function patchConfig(buf, cfg) {
     if (portSize) portSize = parseInt(portSize)
     let portSize0 = portSize
     if (portSize)
-        portSize = portSize % 1000
+        portSize &= 0xfff;
 
     // expand pin names
     forAll((kn, k, v) => {
@@ -431,6 +432,11 @@ function patchConfig(buf, cfg) {
             if (!portSize) err("PINS_PORT_SIZE not specified, while trying to parse PIN " + v)
             if (pin >= portSize) err("Pin name invalid: " + v)
             cfgMap[k] = (thePort * portSize + pin) + ""
+        }
+
+        m = /^P_?(\d+)$/.exec(v)
+        if (m) {
+            cfgMap[k] = parseInt(m[1])
         }
     })
 
