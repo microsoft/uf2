@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+<head>
+  <meta charset="UTF-8">
+
+  <title>CF2 binary patcher</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#157878">
+  <link rel="stylesheet" href="https://microsoft.github.io/uf2/assets/css/style.css">
+  <script src="patcher.js"></script>
+  <script src="web.js"></script>
+  <style>
+    #patch {
+      font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+      font-size: 0.9rem;
+      width: 100%;
+      height: 12em;
+    }
+    .page-header {
+      padding: 2rem 2rem !important;
+    }
+    .btn-dl, .btn-dl:hover {
+      background-color: green;
+      float: right;
+    }
+  </style>
+</head>
+
+<body>
+  <section class="page-header" ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
+    <h1 class="project-name">CF2 patcher</h1>
+    <h2 class="project-tagline">Drop UF2 file here to binary patch it with your config</h2>
+
+  </section>
+
+  <section class="main-content">
+    <h1>Your patch</h1>
+    <textarea id="patch" spellcheck=false onchange="savePatch(event);"></textarea>
+    <a href="#" id="apply" class="btn btn-dl">Apply my patch</a>
+
+    <h1>Current config</h1>
+    <pre><code id="currconfig">Drop UF2 file above to see its config.</code></pre>
+
+  </section>
+
+  <script>
+    restorePatch()
+  </script>
+
+</body>
+
+</html>
