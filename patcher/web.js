@@ -11,6 +11,21 @@ function restorePatch() {
     document.getElementById("apply").onclick = applyPatch
 }
 
+function download(buf, name) {
+    let blob = new Blob([buf], {
+        type: "application/x-uf2"
+    });
+    let url = URL.createObjectURL(blob);
+
+    let a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style = "display: none";
+    a.href = url;
+    a.download = name;
+    a.click();
+    window.URL.revokeObjectURL(url);
+}
+
 let currUF2 = null
 let currUF2Name = ""
 
@@ -28,7 +43,10 @@ function wrap(f) {
         log("Exception: " + e.message)
         showMSG()
     }
+}
 
+function defines() {
+    download(configkeysH(), "configkeys.h")
 }
 
 function applyPatch() {
@@ -47,19 +65,7 @@ function applyPatch() {
             } else {
                 log("\nChanges:\n" + changes)
                 log("Downloading " + currUF2Name)
-
-                let blob = new Blob([buf], {
-                    type: "application/x-uf2"
-                });
-                let url = URL.createObjectURL(blob);
-
-                let a = document.createElement("a");
-                document.body.appendChild(a);
-                a.style = "display: none";
-                a.href = url;
-                a.download = currUF2Name
-                a.click();
-                window.URL.revokeObjectURL(url);
+                download(buf, currUF2Name)
             }
         }
     })

@@ -196,6 +196,25 @@ const UF2_MAGIC_END = 0x0AB16F30 // Ditto
 const CFG_MAGIC0 = 0x1e9e10f1
 const CFG_MAGIC1 = 0x20227a79
 
+function configkeysH() {
+    let r = "#ifndef __CONFIGKEYS_H\n#define __CONFIGKEYS_H 1\n\n"
+    
+    r += "#define CFG_MAGIC0 0x1e9e10f1\n"
+    r += "#define CFG_MAGIC1 0x20227a79\n\n"
+
+    for (let k of Object.keys(configKeys)) {
+        r += `#define CFG_${k} ${configKeys[k]}\n`
+    }
+    for (let k of Object.keys(enums)) {
+        r += "\n"
+        for (let kk of Object.keys(enums[k])) {
+            r += `#define ${k}_${kk} ${enums[k][kk]}\n`
+        }
+    }
+    r += "\n#endif // __CONFIGKEYS_H\n"
+    return r
+}
+
 function err(msg) {
     log("Fatal error: " + msg)
     if (typeof window == "undefined") {

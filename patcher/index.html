@@ -27,6 +27,7 @@
     .btn-dl:hover {
       background-color: green;
       float: right;
+      color: white;
     }
   </style>
 </head>
@@ -34,7 +35,6 @@
 <body ondrop="dropHandler(event);" ondragover="dragOverHandler(event);">
   <section class="page-header">
     <h1 class="project-name">CF2 patcher</h1>
-
   </section>
 
   <section class="main-content">
@@ -45,6 +45,9 @@
     <h2>Information</h2>
     <pre><code id="currconfig">Drop UF2 file above to see its config.</code></pre>
 
+    <p>
+      <a href="#" onclick="defines()">Download configkeys.h</a>
+    </p>
   </section>
 
   <script>
