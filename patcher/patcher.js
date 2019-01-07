@@ -449,7 +449,7 @@ function lookupCfg(cfgdata, key) {
 }
 
 function pinToString(pinNo, portSize) {
-    if (!portSize)
+    if (!portSize || pinNo >= 1000)
         return "P_" + pinNo
 
     let useLetters = true
