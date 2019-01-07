@@ -196,19 +196,31 @@ const UF2_MAGIC_END = 0x0AB16F30 // Ditto
 const CFG_MAGIC0 = 0x1e9e10f1
 const CFG_MAGIC1 = 0x20227a79
 
+let all_defines = {}
+
 function configkeysH() {
     let r = "#ifndef __CONFIGKEYS_H\n#define __CONFIGKEYS_H 1\n\n"
 
-    r += "#define CFG_MAGIC0 0x1e9e10f1\n"
-    r += "#define CFG_MAGIC1 0x20227a79\n\n"
+    const add = (k, v) => {
+        all_defines[k] = v
+        if (v > 1000 || !/^CFG_/.test(k))
+            v = "0x" + v.toString(16)
+        else
+            v += ""
+        r += "#define " + k + " " + v + "\n"
+    }
+
+    add("CFG_MAGIC0", CFG_MAGIC0)
+    add("CFG_MAGIC1", CFG_MAGIC1)
+    r += "\n"
 
     for (let k of Object.keys(configKeys)) {
-        r += `#define CFG_${k} ${configKeys[k]}\n`
+        add("CFG_" + k, configKeys[k])
     }
     for (let k of Object.keys(enums)) {
         r += "\n"
         for (let kk of Object.keys(enums[k])) {
-            r += `#define ${k}_${kk} 0x${enums[k][kk].toString(16)}\n`
+            add(`${k}_${kk}`, enums[k][kk])
         }
     }
     r += "\n#endif // __CONFIGKEYS_H\n"
@@ -235,13 +247,118 @@ function write32(buf, off, v) {
     buf[off + 3] = (v >> 24) & 0xff
 }
 
+function patchHFile(file, patch) {
+    configkeysH()
+    let resFile = ""
+    let inZone = false
+    let flags = {}
+    let lineNo = 0
+    let nums = []
+    for (let line0 of file.split(/\n/)) {
+        lineNo++
+        let append = line0 + "\n"
+        let line = line0.trim().replace(/\/\/.*/, "")
+        if (inZone) {
+            if (line.indexOf("/* CF2 END */") >= 0) {
+                inZone = false
+                if (patch) {
+                    let portSize = lookupCfg(patch, configKeys.PINS_PORT_SIZE)
+                    let s = ""
+                    let size = flags["size"] || 100
+                    let numentries = patch.length >> 1
+                    size = Math.max(size, numentries + 4)
+                    s += `    ${CFG_MAGIC0}, ${CFG_MAGIC1}, // magic\n`
+                    s += `    ${numentries}, ${size},  // used entries, total entries\n`
+                    for (let i = 0; i < numentries; ++i) {
+                        let k = patch[i * 2]
+                        let v = patch[i * 2 + 1]
+                        s += `    ${k}, 0x${v.toString(16)}, // ${showKV(k,v,portSize,patch)}\n`
+                    }
+                    s += "   "
+                    for (let i = 0; i < size - numentries; ++i) {
+                        if (i && i % 16 == 0)
+                            s += "\n   "
+                        s += " 0, 0,"
+                    }
+                    s += "\n"
+                    append = s + line0 + "\n"
+                }
+            } else {
+                append = ""
+                let toks = line.split(/,\s*/).map(s => s.trim()).filter(s => !!s)
+                for (let tok of toks) {
+                    let n = parseInt(tok)
+                    if (isNaN(n)) {
+                        n = all_defines[tok]
+                        if (n === undefined) {
+                            let portSize = lookupCfg(nums, configKeys.PINS_PORT_SIZE)
+                            if (portSize) portSize &= 0xfff;
+                            let pp = parsePinName(tok.replace(/^PIN_/, ""), portSize)
+                            if (pp !== undefined) {
+                                n = pp
+                            } else {
+                                err(`unknown value ${tok} at line ${lineNo}`)
+                            }
+                        }
+                    }
+                    nums.push(n)
+                }
+            }
+        } else {
+            let m = /\/\* CF2 START (.*)/.exec(line)
+            if (m) {
+                inZone = true
+                for (let k of m[1].split(/\s+/)) {
+                    let mm = /^(\w+)=(\d+)$/.exec(k)
+                    if (mm)
+                        flags[mm[1]] = parseInt(mm[2])
+                    else
+                        flags[k] = true
+                }
+            }
+        }
+        resFile += append
+    }
+
+    if (nums.length) {
+        if (nums[0] != CFG_MAGIC0 || nums[1] != CFG_MAGIC1)
+            err("no magic in H file")
+        nums = nums.slice(4)
+        for (let i = 0; i < nums.length; i += 2) {
+            if (nums[i] == 0) {
+                if (nums.slice(i).some(x => x != 0))
+                    err("config keys follow zero terminator")
+                else
+                    nums = nums.slice(0, i)
+                break
+            }
+        }
+    }
+
+    return {
+        patched: resFile,
+        data: nums
+    }
+}
+
+function bufToString(buf) {
+    let s = ""
+    for (let i = 0; i < buf.length; ++i)
+        s += String.fromCharCode(buf[i])
+    return s
+}
+
+function stringToBuf(str) {
+    let buf = new Uint8Array(str.length)
+    for (let i = 0; i < buf.length; ++i)
+        buf[i] = str.charCodeAt(i)
+    return buf
+}
 
 function readWriteConfig(buf, patch) {
     let patchPtr = null
     let origData = []
     let cfgLen = 0
-    if (patch)
-        patch.push(0, 0)
     let isUF2 = false
     if (read32(buf, 0) == UF2_MAGIC_START0) {
         isUF2 = true
@@ -252,9 +369,19 @@ function readWriteConfig(buf, patch) {
             (read32(buf, 4) & 1) == 1) {
             log("# detected BIN file")
         } else {
-            err("unknown file format")
+            let str = bufToString(buf)
+            if (str.indexOf("/* CF2 START") >= 0) {
+                log("# detected CF2 header file")
+                let rr = patchHFile(str, patch)
+                console.log(rr.data)
+                return patch ? stringToBuf(rr.patched) : rr.data
+            } else {
+                err("unknown file format")
+            }
         }
     }
+    if (patch)
+        patch.push(0, 0)
     for (let off = 0; off < buf.length; off += 512) {
         let start = 0
         let payloadLen = 512
@@ -311,9 +438,8 @@ function readWriteConfig(buf, patch) {
     if (tail.some(x => x != 0))
         err("config data not zero terminated: " + tail.join(","))
     origData = origData.slice(0, origData.length - 2)
-    return origData
+    return patch ? buf : origData
 }
-
 
 function lookupCfg(cfgdata, key) {
     for (let i = 0; i < cfgdata.length; i += 2)
@@ -423,7 +549,36 @@ function readConfig(buf) {
         lines.push(showKV(cfgdata[i * 2], cfgdata[i * 2 + 1], portSize, cfgdata))
     }
     lines.sort(cmpKeys)
-    return lines.join("\n")
+    return lines.length ? lines.join("\n") : "Empty config."
+}
+
+function parsePinName(v, portSize) {
+    let thePort = -1
+    let pin = -1
+
+    let m = /^P([A-Z])_?(\d+)$/.exec(v)
+    if (m) {
+        pin = parseInt(m[2])
+        thePort = m[1].charCodeAt(0) - 65
+    }
+
+    m = /^P(\d+)_(\d+)$/.exec(v)
+    if (m) {
+        pin = parseInt(m[2])
+        thePort = parseInt(m[1])
+    }
+
+    if (thePort >= 0) {
+        if (!portSize) err("PINS_PORT_SIZE not specified, while trying to parse PIN " + v)
+        if (pin >= portSize) err("Pin name invalid: " + v)
+        return (thePort * portSize + pin) + ""
+    }
+
+    m = /^P_?(\d+)$/.exec(v)
+    if (m)
+        return m[1]
+
+    return undefined
 }
 
 function patchConfig(buf, cfg) {
@@ -478,31 +633,9 @@ function patchConfig(buf, cfg) {
 
     // expand pin names
     forAll((kn, k, v) => {
-        let thePort = -1
-        let pin = -1
-
-        let m = /^P([A-Z])_?(\d+)$/.exec(v)
-        if (m) {
-            pin = parseInt(m[2])
-            thePort = m[1].charCodeAt(0) - 65
-        }
-
-        m = /^P(\d+)_(\d+)$/.exec(v)
-        if (m) {
-            pin = parseInt(m[2])
-            thePort = parseInt(m[1])
-        }
-
-        if (thePort >= 0) {
-            if (!portSize) err("PINS_PORT_SIZE not specified, while trying to parse PIN " + v)
-            if (pin >= portSize) err("Pin name invalid: " + v)
-            cfgMap[k] = (thePort * portSize + pin) + ""
-        }
-
-        m = /^P_?(\d+)$/.exec(v)
-        if (m) {
-            cfgMap[k] = parseInt(m[1])
-        }
+        let p = parsePinName(v, portSize)
+        if (p)
+            cfgMap[k] = p
     })
 
     // expand existing keys
@@ -544,9 +677,12 @@ function patchConfig(buf, cfg) {
         }
     }
 
-    readWriteConfig(buf, patch)
+    let patched = readWriteConfig(buf, patch)
 
-    return changes
+    return {
+        changes,
+        patched
+    }
 }
 
 function parseHFile(hFile) {
@@ -576,13 +712,13 @@ function main() {
 
     if (process.argv[3]) {
         let cfg = readBin(process.argv[3]).toString("utf8")
-        let changes = patchConfig(uf2, cfg)
-        if (!changes)
+        let r = patchConfig(uf2, cfg)
+        if (!r.changes)
             console.log("No changes.")
         else
-            console.log("\nChanges:\n" + changes)
+            console.log("\nChanges:\n" + r.changes)
         console.log("# Writing config...")
-        fs.writeFileSync(process.argv[2], uf2)
+        fs.writeFileSync(process.argv[2], r.patched)
     } else {
         console.log(readConfig(uf2))
     }

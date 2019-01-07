@@ -59,13 +59,13 @@ function applyPatch() {
             log("You didn't give any patch to apply.")
         else {
             let buf = currUF2.slice()
-            let changes = patchConfig(buf, newcfg)
-            if (!changes) {
+            let r = patchConfig(buf, newcfg)
+            if (!r.changes) {
                 log("No changes.")
             } else {
-                log("\nChanges:\n" + changes)
+                log("\nChanges:\n" + r.changes)
                 log("Downloading " + currUF2Name)
-                download(buf, currUF2Name)
+                download(r.patched, currUF2Name)
             }
         }
     })
