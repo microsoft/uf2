@@ -248,7 +248,7 @@ function readWriteConfig(buf, patch) {
         log("# detected UF2 file")
     } else {
         let stackBase = read32(buf, 0)
-        if ((stackBase & 0xff0000ff) == 0x20000000 &&
+        if ((stackBase & 0xff000003) == 0x20000000 &&
             (read32(buf, 4) & 1) == 1) {
             log("# detected BIN file")
         } else {
@@ -307,8 +307,9 @@ function readWriteConfig(buf, patch) {
         err("config data not found")
     if (patch && patchPtr < patch.length)
         err("no space for config data")
-    if (origData.slice(origData.length - 2).some(x => x != 0))
-        err("config data not zero terminated")
+    let tail = origData.slice(origData.length - 2)
+    if (tail.some(x => x != 0))
+        err("config data not zero terminated: " + tail.join(","))
     origData = origData.slice(0, origData.length - 2)
     return origData
 }
@@ -339,7 +340,44 @@ function pinToString(pinNo, portSize) {
     }
 }
 
-function showKV(k, v, portSize) {
+function isHeaderPin(n) {
+    return /^PIN_(MOSI|MISO|SCK|SDA|SCL|RX|TX|[AD]\d+)$/.test(n)
+}
+
+function keyWeight(k) {
+    if (k == "PINS_PORT_SIZE")
+        return 10
+    if (isHeaderPin(k))
+        return 20
+    if (/^PIN_/.test(k))
+        return 30
+    return 40
+}
+
+function expandNum(k) {
+    return k.replace(/\d+/g, f => {
+        if (f.length > 4)
+            return f
+        return ("0000" + f).slice(-4)
+    })
+}
+
+function cmpKeys(a, b) {
+    a = a.replace(/ =.*/, "")
+    b = b.replace(/ =.*/, "")
+    if (a == b)
+        return 0
+    let d = keyWeight(a) - keyWeight(b)
+    if (d) return d
+    let aa = expandNum(a)
+    let bb = expandNum(b)
+    if (aa < bb) return -1
+    else if (bb < aa) return 1
+    else if (a < b) return -1
+    else return 1
+}
+
+function showKV(k, v, portSize, data) {
     let vn = ""
 
     let kn = configInvKeys[k + ""] || ""
@@ -356,9 +394,16 @@ function showKV(k, v, portSize) {
     if (vn == "") {
         if (/_CFG/.test(kn) || v > 10000)
             vn = "0x" + v.toString(16)
-        else if (/^PIN_/.test(kn))
-            vn = pinToString(v, portSize)
-        else
+        else if (/^PIN_/.test(kn)) {
+            if (data && !isHeaderPin(kn)) {
+                for (let pn of Object.keys(configKeys)) {
+                    if (isHeaderPin(pn) && lookupCfg(data, configKeys[pn]) === v)
+                        vn = pn
+                }
+            }
+            if (!vn)
+                vn = pinToString(v, portSize)
+        } else
             vn = v + ""
     }
 
@@ -375,9 +420,9 @@ function readConfig(buf) {
     let numentries = cfgdata.length >> 1
     let lines = []
     for (let i = 0; i < numentries; ++i) {
-        lines.push(showKV(cfgdata[i * 2], cfgdata[i * 2 + 1], portSize))
+        lines.push(showKV(cfgdata[i * 2], cfgdata[i * 2 + 1], portSize, cfgdata))
     }
-    lines.sort()
+    lines.sort(cmpKeys)
     return lines.join("\n")
 }
 
