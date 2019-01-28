@@ -73,6 +73,11 @@ const configKeys = {
     PIN_BTNMX_LATCH: 71,
     PIN_BTNMX_CLOCK: 72,
     PIN_BTNMX_DATA: 73,
+    PIN_BTN_MENU2: 74,
+    PIN_BATTSENSE: 75,
+    PIN_VIBRATION: 76,
+    PIN_PWREN: 77,
+
     PIN_A0: 100,
     PIN_A1: 101,
     PIN_A2: 102,
