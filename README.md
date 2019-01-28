@@ -98,13 +98,13 @@ The reason to pick numbers at random is to minimize risk of collisions
 in the wild. Do not pick random numbers by banging on keyboard, or by using
 `0xdeadf00d`, `0x42424242` etc. A good way is to use the following
 shell command: `printf "0x%04x%04x\n" $RANDOM $RANDOM`
-This procedure was unfortunately not used for the SAMD51 below.
+This procedure was unfortunately not used for the SAMD51 and NRF52840 below.
 
 #### Family list
 
 * Microchip (Atmel) SAMD21 - 0x68ed2b88
 * Microchip (Atmel) SAMD51 - 0x55114460
-* Nordic NRF52840 - 0x1b57745f
+* Nordic NRF52840 - 0xada52840
 * ST STM32F103 - 0x5ee21072
 * ST STM32F401 - 0x57755a57
 * Microchip (Atmel) ATmega32 - 0x16573617
