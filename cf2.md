@@ -94,6 +94,9 @@ PIN_DISPLAY_MOSI = PIN_MOSI
 # custom configuration keys
 _679732427 = 123
 _815320287 = 0x80192
+
+# remove an existing config entry
+PIN_BTN_MENU2 = null
 ```
 
 The keys are either key names, or underscore followed by a decimal number.
@@ -108,6 +111,10 @@ The way pin numbers are parsed depends on the `PINS_PORT_SIZE`:
 
 Certain keys (like `PINS_PORT_SIZE`) have a number of pre-defined values,
 which can be used instead of integers.
+
+Because you're usually use this syntax to patch an existing configuration,
+you sometimes may want to remove an entry that's already there.
+To do that, use `null` as the value of the key.
 
 For list of keys and predefined values, see `configkeys.h` which can be downloaded
 from the patcher website.

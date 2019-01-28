@@ -654,6 +654,16 @@ function patchConfig(buf, cfg) {
             }
         })
 
+    let changes = ""
+    forAll((kn, k, v) => {
+        v = v.toUpperCase()
+        if (v == "NULL" || v == "UNDEFINED") {
+            let old = lookupCfg(cfgdata, k)
+            changes += "remove " + showKV(k, old, portSize0) + "\n"
+            delete cfgMap[k]
+        }
+    })
+
     forAll((kn, k, v) => {
         if (isNaN(parseInt(v)))
             err("Value not understood: " + v)
@@ -667,7 +677,6 @@ function patchConfig(buf, cfg) {
         patch.push(parseInt(cfgMap[k]))
     }
 
-    let changes = ""
     for (let i = 0; i < patch.length; i += 2) {
         let k = patch[i]
         let v = patch[i + 1]
