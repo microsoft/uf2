@@ -121,6 +121,7 @@ const configKeys = {
     BOOTLOADER_BOARD_ID: 208,
     UF2_FAMILY: 209,
     PINS_PORT_SIZE: 210,
+    BOOTLOADER_PROTECTION: 211,
 }
 
 const enums = {
