@@ -132,6 +132,7 @@ const enums = {
         FXOS8700: 0x3C,
         MMA8653: 0x3A,
         MSA300: 0x4C,
+        MPU6050: 0x68,
     },
     UF2_FAMILY: {
         ATSAMD21: 0x68ed2b88,
@@ -162,6 +163,7 @@ const enums = {
 let infoMsg = ""
 
 function log(msg) {
+    msg = "# " + msg
     infoMsg += msg + "\n"
     console.log(msg)
 }
@@ -368,16 +370,16 @@ function readWriteConfig(buf, patch) {
     let isUF2 = false
     if (read32(buf, 0) == UF2_MAGIC_START0) {
         isUF2 = true
-        log("# detected UF2 file")
+        log("detected UF2 file")
     } else {
         let stackBase = read32(buf, 0)
         if ((stackBase & 0xff000003) == 0x20000000 &&
             (read32(buf, 4) & 1) == 1) {
-            log("# detected BIN file")
+            log("detected BIN file")
         } else {
             let str = bufToString(buf)
             if (str.indexOf("/* CF2 START") >= 0) {
-                log("# detected CF2 header file")
+                log("detected CF2 header file")
                 let rr = patchHFile(str, patch)
                 console.log(rr.data)
                 return patch ? stringToBuf(rr.patched) : rr.data
@@ -408,10 +410,10 @@ function readWriteConfig(buf, patch) {
                 read32(buf, off + i + 4) == CFG_MAGIC1) {
                 let addrS = "0x" + (addr + i).toString(16)
                 if (patchPtr === null) {
-                    log(`# Found CFG DATA at ${addrS}`)
+                    log(`Found CFG DATA at ${addrS}`)
                     patchPtr = -4
                 } else {
-                    log(`# Skipping second CFG DATA at ${addrS}`)
+                    log(`Skipping second CFG DATA at ${addrS}`)
                 }
             }
 
@@ -423,7 +425,7 @@ function readWriteConfig(buf, patch) {
                 }
 
                 if (patchPtr >= 0) {
-                    if (origData.length < cfgLen * 2 + 2)
+                    if (origData.length < cfgLen * 2 + 40)
                         origData.push(read32(buf, off + i))
                     if (patch) {
                         if (patchPtr < patch.length) {
@@ -435,6 +437,14 @@ function readWriteConfig(buf, patch) {
             }
         }
     }
+
+    let len0 = cfgLen * 2
+    origData.push(0, 0)
+    while (origData[len0])
+        len0 += 2
+    origData = origData.slice(0, len0 + 2)
+    if (len0 != cfgLen * 2)
+        log("size information incorrect; continuing anyway")
 
     if (origData.length == 0)
         err("config data not found")

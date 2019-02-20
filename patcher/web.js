@@ -78,14 +78,14 @@ function dropHandler(ev) {
         if (ev.dataTransfer.items[i].kind === 'file') {
             let file = ev.dataTransfer.items[i].getAsFile();
             let reader = new FileReader();
+            infoMsg = ""
             reader.onload = e => {
                 wrap(() => {
                     let buf = new Uint8Array(reader.result)
                     let cfg = readConfig(buf)
                     currUF2 = buf
-                    infoMsg = ""
+                    infoMsg += "\n" + cfg
                     currUF2Name = file.name
-                    document.getElementById("currconfig").textContent = cfg
                 })
             }
             reader.readAsArrayBuffer(file);
