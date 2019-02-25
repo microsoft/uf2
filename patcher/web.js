@@ -64,9 +64,9 @@ function applyPatch() {
                 log("No changes.")
             } else {
                 log("\nChanges:\n" + r.changes)
-                log("Downloading " + currUF2Name)
-                download(r.patched, currUF2Name)
             }
+            log("Downloading " + currUF2Name)
+            download(r.patched, currUF2Name)
         }
     })
 }

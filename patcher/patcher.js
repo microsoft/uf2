@@ -122,6 +122,7 @@ const configKeys = {
     UF2_FAMILY: 209,
     PINS_PORT_SIZE: 210,
     BOOTLOADER_PROTECTION: 211,
+    POWER_DEEPSLEEP_TIMEOUT: 212,
 }
 
 const enums = {
@@ -539,8 +540,10 @@ function showKV(k, v, portSize, data) {
         else if (/^PIN_/.test(kn)) {
             if (data && !isHeaderPin(kn)) {
                 for (let pn of Object.keys(configKeys)) {
-                    if (isHeaderPin(pn) && lookupCfg(data, configKeys[pn]) === v)
+                    if (isHeaderPin(pn) && lookupCfg(data, configKeys[pn]) === v) {
                         vn = pn
+                        break
+                    }
                 }
             }
             if (!vn)
@@ -616,7 +619,7 @@ function patchConfig(buf, cfg) {
             k = parseInt(kn.slice(1))
         if (!k)
             err("Unrecognized key name: " + kn)
-        cfgMap[configKeys[kn] + ""] = m[2]
+        cfgMap[k + ""] = m[2]
     }
 
     let cfgdata = readWriteConfig(buf, null)
