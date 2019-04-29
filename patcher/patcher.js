@@ -155,6 +155,7 @@ const configKeys = {
     PINS_PORT_SIZE: 210,
     BOOTLOADER_PROTECTION: 211,
     POWER_DEEPSLEEP_TIMEOUT: 212,
+    ANALOG_BUTTON_THRESHOLD: 213,
     PIN_B0: 300,
     PIN_B1: 301,
     PIN_B2: 302,
@@ -291,6 +292,12 @@ const enums = {
         ACTIVE_LOW_PULL_UP: 0x20,
         ACTIVE_LOW_PULL_NONE: 0x30,
     },
+    ".": {
+        BTN_FLAG_ACTIVE_HIGH: 0x110000,
+        BTN_FLAG_ACTIVE_LOW: 0x200000,
+        BTN_OFFSET_ANALOG_PLUS: 1100,
+        BTN_OFFSET_ANALOG_MINUS: 1200,
+    }
 }
 
 
@@ -362,7 +369,8 @@ function configkeysH() {
     for (let k of Object.keys(enums)) {
         r += "\n"
         for (let kk of Object.keys(enums[k])) {
-            add(`${k}_${kk}`, enums[k][kk])
+            let n = k == "." ? kk : `${k}_${kk}`
+            add(n, enums[k][kk])
         }
     }
     r += "\n#endif // __CONFIGKEYS_H\n"
@@ -708,7 +716,24 @@ function parsePinName(v, portSize) {
     let thePort = -1
     let pin = -1
 
-    let m = /^P([A-Z])_?(\d+)$/.exec(v)
+    v = v.trim()
+
+    const env = enums["."][v]
+    if (env !== undefined)
+        return env
+
+    let m = /(.*)([\|+])(.*)/.exec(v)
+    if (m) {
+        let v0 = parsePinName(m[1], portSize)
+        let v1 = parsePinName(m[3], portSize)
+        if (v0 === undefined || v1 === undefined)
+            return undefined
+        v0 = parseInt(v0)
+        v1 = parseInt(v1)
+        return "" + (m[2] == "|" ? v0 | v1 : v0 + v1)
+    }
+
+    m = /^P([A-Z])_?(\d+)$/.exec(v)
     if (m) {
         pin = parseInt(m[2])
         thePort = m[1].charCodeAt(0) - 65
@@ -743,7 +768,7 @@ function patchConfig(buf, cfg) {
         line = line.trim()
         if (!line)
             continue
-        let m = /(\w+)\s*=\s*(\w+)/.exec(line)
+        let m = /(\w+)\s*=\s*([^#]+)/.exec(line)
         if (!m)
             err("syntax error at config line " + lineNo)
         let kn = m[1].toUpperCase()
