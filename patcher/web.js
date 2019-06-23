@@ -5,10 +5,18 @@ function savePatch(ev) {
     localStorage["UF2_PATCH"] = text.value
 }
 
+function genRnd() {
+    let vals = new Uint32Array(1)
+    window.crypto.getRandomValues(vals)
+    document.getElementById("rnd-res").textContent = "Random number: 0x" + 
+        ("000000000" + vals[0].toString(16)).slice(-8)
+}
+
 function restorePatch() {
     let text = document.getElementById("patch")
     text.value = localStorage["UF2_PATCH"] || ""
     document.getElementById("apply").onclick = applyPatch
+    document.getElementById("rnd").onclick = genRnd
 }
 
 function download(buf, name) {
