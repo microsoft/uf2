@@ -98,6 +98,7 @@ The reason to pick numbers at random is to minimize risk of collisions
 in the wild. Do not pick random numbers by banging on keyboard, or by using
 `0xdeadf00d`, `0x42424242` etc. A good way is to use the following
 shell command: `printf "0x%04x%04x\n" $RANDOM $RANDOM`
+Another good way is the link at the bottom of https://microsoft.github.io/uf2/patcher/
 This procedure was unfortunately not used for the SAMD51 and NRF52840 below.
 
 #### Family list

@@ -5,7 +5,8 @@ function savePatch(ev) {
     localStorage["UF2_PATCH"] = text.value
 }
 
-function genRnd() {
+function genRnd(ev) {
+    ev.preventDefault()
     let vals = new Uint32Array(1)
     window.crypto.getRandomValues(vals)
     document.getElementById("rnd-res").textContent = "Random number: 0x" + 
