@@ -77,6 +77,7 @@ const configKeys = {
     PIN_BATTSENSE: 75,
     PIN_VIBRATION: 76,
     PIN_PWREN: 77,
+    DISPLAY_TYPE: 78,
 
     PIN_A0: 100,
     PIN_A1: 101,
@@ -263,6 +264,7 @@ const enums = {
     // these are the same as the default I2C ID
     ACCELEROMETER_TYPE: {
         LIS3DH: 0x32,
+        LIS3DH_ALT: 0x30,
         MMA8453: 0x38,
         FXOS8700: 0x3C,
         MMA8653: 0x3A,
@@ -291,6 +293,10 @@ const enums = {
         ACTIVE_LOW_PULL_DOWN: 0x10,
         ACTIVE_LOW_PULL_UP: 0x20,
         ACTIVE_LOW_PULL_NONE: 0x30,
+    },
+    DISPLAY_TYPE: {
+        ST7735: 7735,
+        ILI9341: 9341,
     },
     ".": {
         BTN_FLAG_ACTIVE_HIGH: 0x110000,
