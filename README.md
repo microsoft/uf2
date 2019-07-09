@@ -274,7 +274,7 @@ When the `0x4000` flag is set, the last 24 bytes of `data[]` hold the following 
 The flashing program should compute the MD5 sum of the specified region.
 If the region checksum matches, flashing of the current block can be skipped.
 Typically, many blocks in sequence will have the same region specified,
-and all be skipped, if the matching succeeded.
+and can all be skipped, if the matching succeeded.
 The position of the current block will typically be inside of the region.
 The position and size of the region should be multiple of page erase size
 (4k or 64k on typical SPI flash).
