@@ -74,6 +74,7 @@ Currently, there are three flags defined:
 * `0x00001000` - **file container** - see below
 * `0x00002000` - **familyID present** - when set, the `fileSize/familyID` holds a value
   identifying the board family (usually corresponds to an MCU)
+* `0x00004000` - **MD5 checksum present** - see below
 
 ### Family ID
 
@@ -110,6 +111,7 @@ This procedure was unfortunately not used for the SAMD51 and NRF52840 below.
 * ST STM32F401 - 0x57755a57
 * Microchip (Atmel) ATmega32 - 0x16573617
 * Cypress FX2 - 0x5a18069b
+* ESP32 - 0x1c5f21b0
 
 ### Rationale
 
@@ -258,6 +260,27 @@ Typical writing procedure is as follows:
 
 The fields `blockNo` and `numBlocks` refer to the entire UF2 file, not the current
 file.
+
+## MD5 checksum
+
+When the `0x4000` flag is set, the last 24 bytes of `data[]` hold the following structure:
+
+| Offset | Size | Value                                             |
+|--------|------|---------------------------------------------------|
+| 0      | 4    | Start address of region                           |
+| 4      | 4    | Length of region in bytes                         |
+| 8      | 16   | MD5 checksum in binary format                     |
+
+The flashing program should compute the MD5 sum of the specified region.
+If the region checksum matches, flashing of the current block can be skipped.
+Typically, many blocks in sequence will have the same region specified,
+and all be skipped, if the matching succeeded.
+The position of the current block will typically be inside of the region.
+The position and size of the region should be multiple of page erase size
+(4k or 64k on typical SPI flash).
+
+This is currently only used on ESP32, which is also why MD5 checksum is used.
+
 
 ## Implementations
 
