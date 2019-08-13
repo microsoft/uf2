@@ -298,6 +298,7 @@ There's an ongoing effort to implement UF2 in [Codal](https://github.com/lancast
 
 ### Editors
 
+* https://arcade.makecode.com
 * https://makecode.adafruit.com
 * https://makecode.seeedstudio.com
 * https://maker.makecode.com
