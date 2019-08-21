@@ -58,7 +58,11 @@ struct UF2_Block {
     uint32_t payloadSize;
     uint32_t blockNo;
     uint32_t numBlocks;
-    uint32_t fileSize; // or familyID;
+	union {
+		uint32_t fileSize;
+		uint32_t familyID;
+		uint32_t reserved;
+	}
     uint8_t data[476];
     uint32_t magicEnd;
 } UF2_Block;
@@ -75,6 +79,7 @@ Currently, there are three flags defined:
 * `0x00002000` - **familyID present** - when set, the `fileSize/familyID` holds a value
   identifying the board family (usually corresponds to an MCU)
 * `0x00004000` - **MD5 checksum present** - see below
+* `0x00008000` - **payload encrypted** - payload is encrypted. Encryption algorithm is not specified.
 
 ### Family ID
 
