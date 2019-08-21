@@ -58,11 +58,11 @@ struct UF2_Block {
     uint32_t payloadSize;
     uint32_t blockNo;
     uint32_t numBlocks;
-	union {
-		uint32_t fileSize;
-		uint32_t familyID;
-		uint32_t reserved;
-	};
+    union {
+        uint32_t fileSize;
+        uint32_t familyID;
+        uint32_t reserved;
+    };
     uint8_t data[476];
     uint32_t magicEnd;
 } UF2_Block;
