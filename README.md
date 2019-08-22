@@ -109,6 +109,8 @@ This procedure was unfortunately not used for the SAMD51 and NRF52840 below.
 * Nordic NRF52840 - 0xada52840
 * ST STM32F103 - 0x5ee21072
 * ST STM32F401 - 0x57755a57
+* ST STM32F407 - 0x6d0922fa
+* ST STM32F407VG - 0x8fb060fe
 * Microchip (Atmel) ATmega32 - 0x16573617
 * Cypress FX2 - 0x5a18069b
 * ESP32 - 0x1c5f21b0
