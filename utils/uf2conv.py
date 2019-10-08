@@ -167,13 +167,16 @@ def convert_from_hex_to_uf2(buf):
         resfile += blocks[i].encode(i, numblocks)
     return resfile
 
+def to_str(b):
+    return b.decode("utf-8")
+
 def get_drives():
     drives = []
     if sys.platform == "win32":
         r = subprocess.check_output(["wmic", "PATH", "Win32_LogicalDisk",
                                      "get", "DeviceID,", "VolumeName,",
                                      "FileSystem,", "DriveType"])
-        for line in r.split('\n'):
+        for line in to_str(r).split('\n'):
             words = re.split('\s+', line)
             if len(words) >= 3 and words[1] == "2" and words[2] == "FAT":
                 drives.append(words[0])
@@ -234,6 +237,8 @@ def main():
                         help='list connected devices')
     parser.add_argument('-c' , '--convert', action='store_true',
                         help='do not flash, just convert')
+    parser.add_argument('-D' , '--deploy', action='store_true',
+                        help='just flash, do not convert')
     parser.add_argument('-f' , '--family', dest='family', type=str,
                         default="0x0",
                         help='specify familyID - number or name (default: 0x0)')
@@ -259,7 +264,9 @@ def main():
             inpbuf = f.read()
         from_uf2 = is_uf2(inpbuf)
         ext = "uf2"
-        if from_uf2:
+        if args.deploy:
+            outbuf = inpbuf
+        elif from_uf2:
             outbuf = convert_from_uf2(inpbuf)
             ext = "bin"
         elif is_hex(inpbuf):
@@ -271,7 +278,7 @@ def main():
             outbuf = convert_to_uf2(inpbuf)
         print("Converting to %s, output size: %d, start address: 0x%x" %
               (ext, len(outbuf), appstartaddr))
-        if args.convert:
+        if args.convert or ext != "uf2":
             drives = []
             if args.output == None:
                 args.output = "flash." + ext
