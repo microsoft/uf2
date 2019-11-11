@@ -105,6 +105,7 @@ This procedure was unfortunately not used for the SAMD51 and NRF52840 below.
 #### Family list
 
 * Microchip (Atmel) SAMD21 - 0x68ed2b88
+* Microchip (Atmel) SAML21 - 0x1851780a
 * Microchip (Atmel) SAMD51 - 0x55114460
 * Nordic NRF52840 - 0xada52840
 * ST STM32F103 - 0x5ee21072
