@@ -14,6 +14,7 @@ UF2_MAGIC_END    = 0x0AB16F30 # Ditto
 
 families = {
     'SAMD21': 0x68ed2b88,
+    'SAML21': 0x1851780a,
     'SAMD51': 0x55114460,
     'NRF52': 0x1b57745f,
     'STM32F1': 0x5ee21072,

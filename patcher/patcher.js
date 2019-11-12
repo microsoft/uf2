@@ -352,6 +352,7 @@ const enums = {
     },
     UF2_FAMILY: {
         ATSAMD21: 0x68ed2b88,
+        ATSAML21: 0x1851780a,
         ATSAMD51: 0x55114460,
         NRF52840: 0x1b57745f,
         STM32F103: 0x5ee21072,
