@@ -115,6 +115,7 @@ This procedure was unfortunately not used for the SAMD51 and NRF52840 below.
 * Microchip (Atmel) ATmega32 - 0x16573617
 * Cypress FX2 - 0x5a18069b
 * ESP32 - 0x1c5f21b0
+* NXP i.MX RT10XX - 0x4fb2d5bd
 
 ### Rationale
 

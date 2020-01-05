@@ -20,6 +20,7 @@ families = {
     'STM32F1': 0x5ee21072,
     'STM32F4': 0x57755a57,
     'ATMEGA32': 0x16573617,
+    'MIMXRT10XX': 0x4FB2D5BD
 }
 
 INFO_FILE = "/INFO_UF2.TXT"
