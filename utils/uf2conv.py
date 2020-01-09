@@ -217,7 +217,7 @@ def list_drives():
 def write_file(name, buf):
     with open(name, "wb") as f:
         f.write(buf)
-    print("Wrote %d bytes to %s." % (len(buf), name))
+    print("Wrote %d bytes to %s" % (len(buf), name))
 
 
 def main():
