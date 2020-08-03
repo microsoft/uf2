@@ -75,6 +75,7 @@ Currently, there are three flags defined:
 * `0x00002000` - **familyID present** - when set, the `fileSize/familyID` holds a value
   identifying the board family (usually corresponds to an MCU)
 * `0x00004000` - **MD5 checksum present** - see below
+* `0x00008000` - **extension tags present** - see below
 
 ### Family ID
 
@@ -285,6 +286,35 @@ The position and size of the region should be multiple of page erase size
 
 This is currently only used on ESP32, which is also why MD5 checksum is used.
 
+## Extension tags
+
+When the `0x8000` flag is set, additional information can be appended right after
+payload data (i.e., it starts at `32 + payloadSize`).
+Every tag starts at 4 byte boundary.
+The first byte of tag contains its total size in bytes (including the size byte
+and type designation).
+The next three bytes designate the type of tag (if you want to define custom
+tags, pick them at random).
+The last tag has size of `0` and type of `0`.
+
+Standard tag designations follow:
+* `0x9fc7bc` - version of firmware file - UTF8 semver string
+* `0x650d9d` - description of device for which the firmware file is destined (UTF8)
+* `0x0be9f7` - page size of target device (32 bit unsigned number)
+* `0xb46db0` - SHA-2 checksum of firmware (can be of various size)
+* `0xc8a729` - device type identifier - a refinement of `familyID` meant to identify a kind of device
+  (eg., a toaster with specific pinout and heating unit), not only MCU; 32 or 64 bit number; can be hash of `0x650d9d`
+
+For example, the following bytes encode firmware version `0.1.2` for device
+named `ACME Toaster mk3` (line breaks added for clarity):
+
+```
+09 bc c7 9f 30 2e 31 2e 32 00 00 00
+14 9d 9d 65 41 43 4d 45 20 54 6f 61 73 74 65 72 20 6d 6b 33
+00 00 00 00
+```
+
+Extension tags can, but don't have to, be repeated in all blocks.
 
 ## Implementations
 
