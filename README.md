@@ -109,10 +109,23 @@ This procedure was unfortunately not used for the SAMD51 and NRF52840 below.
 * Microchip (Atmel) SAML21 - 0x1851780a
 * Microchip (Atmel) SAMD51 - 0x55114460
 * Nordic NRF52840 - 0xada52840
+* ST STM32F0xx - 0x647824b6
 * ST STM32F103 - 0x5ee21072
+* ST STM32F2xx - 0x5d1a0a2e
+* ST STM32F3xx - 0x6b846188
 * ST STM32F401 - 0x57755a57
 * ST STM32F407 - 0x6d0922fa
 * ST STM32F407VG - 0x8fb060fe
+* ST STM32F7xx - 0x53b80f00
+* ST STM32G0xx - 0x300f5633
+* ST STM32G4xx - 0x4c71240a
+* ST STM32H7xx - 0x6db66082
+* ST STM32L0xx - 0x202e3a91
+* ST STM32L1xx - 0x1e1f432d
+* ST STM32L4xx - 0x00ff6919
+* ST STM32L5xx - 0x04240bdf
+* ST STM32WBxx - 0x70d16653
+* ST STM32WLxx - 0x21460ff0
 * Microchip (Atmel) ATmega32 - 0x16573617
 * Cypress FX2 - 0x5a18069b
 * ESP32 - 0x1c5f21b0
