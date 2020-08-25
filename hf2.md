@@ -168,7 +168,7 @@ Reset the device into user-space app. Usually, no response at all will arrive fo
 ```
 
 
-### RESET INTO (0x0004)
+### RESET INTO BOOTLOADER (0x0004)
 
 Reset the device into bootloader, usually for flashing. Usually, no response at all will arrive for this command.
 
