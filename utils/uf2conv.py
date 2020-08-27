@@ -96,9 +96,9 @@ def convert_to_carray(file_content):
     for i in range(len(file_content)):
         if i % 16 == 0:
             outp += "\n"
-        outp += "0x%02x, " % ord(file_content[i])
+        outp += "0x%02x, " % file_content[i]
     outp += "\n};\n"
-    return outp
+    return bytes(outp, "utf-8")
 
 def convert_to_uf2(file_content):
     global familyid
