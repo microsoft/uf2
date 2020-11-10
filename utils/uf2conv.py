@@ -59,7 +59,7 @@ def convert_from_uf2(buf):
     global appstartaddr
     numblocks = len(buf) // 512
     curraddr = None
-    outp = b""
+    outp = []
     for blockno in range(numblocks):
         ptr = blockno * 512
         block = buf[ptr:ptr + 512]
@@ -87,9 +87,9 @@ def convert_from_uf2(buf):
         while padding > 0:
             padding -= 4
             outp += b"\x00\x00\x00\x00"
-        outp += block[32 : 32 + datalen]
+        outp.append(block[32 : 32 + datalen])
         curraddr = newaddr + datalen
-    return outp
+    return b"".join(outp)
 
 def convert_to_carray(file_content):
     outp = "const unsigned char bindata[] __attribute__((aligned(16))) = {"
@@ -106,7 +106,7 @@ def convert_to_uf2(file_content):
     while len(datapadding) < 512 - 256 - 32 - 4:
         datapadding += b"\x00\x00\x00\x00"
     numblocks = (len(file_content) + 255) // 256
-    outp = b""
+    outp = []
     for blockno in range(numblocks):
         ptr = 256 * blockno
         chunk = file_content[ptr:ptr + 256]
@@ -120,8 +120,8 @@ def convert_to_uf2(file_content):
             chunk += b"\x00"
         block = hd + chunk + datapadding + struct.pack(b"<I", UF2_MAGIC_END)
         assert len(block) == 512
-        outp += block
-    return outp
+        outp.append(block)
+    return b"".join(outp)
 
 class Block:
     def __init__(self, addr):
