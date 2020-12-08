@@ -34,7 +34,8 @@ families = {
     'STM32WL': 0x21460ff0,
     'ATMEGA32': 0x16573617,
     'MIMXRT10XX': 0x4FB2D5BD,
-    'GD32F350': 0x31D228C6
+    'GD32F350': 0x31D228C6,
+    'ESP32S2': 0xbfdd4eee
 }
 
 INFO_FILE = "/INFO_UF2.TXT"
@@ -93,7 +94,8 @@ def convert_from_uf2(buf):
     return b"".join(outp)
 
 def convert_to_carray(file_content):
-    outp = "const unsigned char bindata[] __attribute__((aligned(16))) = {"
+    outp = "const unsigned long bindata_len = %d;\n" % len(file_content)
+    outp += "const unsigned char bindata[] __attribute__((aligned(16))) = {"
     for i in range(len(file_content)):
         if i % 16 == 0:
             outp += "\n"
