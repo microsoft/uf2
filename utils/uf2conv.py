@@ -93,7 +93,8 @@ def convert_from_uf2(buf):
     return b"".join(outp)
 
 def convert_to_carray(file_content):
-    outp = "const unsigned char bindata[] __attribute__((aligned(16))) = {"
+    outp = "const unsigned long bindata_len = %d;\n" % len(file_content)
+    outp += "const unsigned char bindata[] __attribute__((aligned(16))) = {"
     for i in range(len(file_content)):
         if i % 16 == 0:
             outp += "\n"
