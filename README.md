@@ -130,7 +130,7 @@ This procedure was unfortunately not used for the SAMD51 and NRF52840 below.
 * Cypress FX2 - 0x5a18069b
 * ESP8266 - 0x7eab61ed
 * ESP32 - 0x1c5f21b0
-* ESP32-S2 - 0x70c5997a
+* ESP32-S2 - 0xbfdd4eee
 * ESP32-C3 - 0xd42ba06c
 * NXP i.MX RT10XX - 0x4fb2d5bd
 * GD32F350 - 0x31d228c6

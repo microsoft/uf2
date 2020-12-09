@@ -34,7 +34,8 @@ families = {
     'STM32WL': 0x21460ff0,
     'ATMEGA32': 0x16573617,
     'MIMXRT10XX': 0x4FB2D5BD,
-    'GD32F350': 0x31D228C6
+    'GD32F350': 0x31D228C6,
+    'ESP32S2': 0xbfdd4eee
 }
 
 INFO_FILE = "/INFO_UF2.TXT"
