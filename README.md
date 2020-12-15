@@ -133,6 +133,7 @@ This procedure was unfortunately not used for the SAMD51 and NRF52840 below.
 * ESP32-S2 - 0xbfdd4eee
 * ESP32-C3 - 0xd42ba06c
 * NXP i.MX RT10XX - 0x4fb2d5bd
+* NXP LPC55xx - 0x2abc77ec
 * GD32F350 - 0x31d228c6
 
 ### Rationale
@@ -344,6 +345,7 @@ Extension tags can, but don't have to, be repeated in all blocks.
 * [Nordic NRF52840](https://github.com/adafruit/Adafruit_nRF52840_Bootloader)
 * [Linux (RPi Zero)](https://github.com/microsoft/uf2-linux)
 * [Cypress FX2](https://github.com/whitequark/libfx2/tree/master/firmware/boot-uf2)
+* [Tiny UF2](https://github.com/adafruit/tinyuf2) - Support ESP32-S2, iMXRT10xx, STM32F4
 
 There's an ongoing effort to implement UF2 in [Codal](https://github.com/lancaster-university/codal-core).
 
