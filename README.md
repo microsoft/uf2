@@ -132,6 +132,7 @@ This procedure was unfortunately not used for the SAMD51 and NRF52840 below.
 * ESP32 - 0x1c5f21b0
 * ESP32-S2 - 0xbfdd4eee
 * ESP32-C3 - 0xd42ba06c
+* ESP32-S3 - 0xc47e5767 
 * NXP i.MX RT10XX - 0x4fb2d5bd
 * NXP LPC55xx - 0x2abc77ec
 * GD32F350 - 0x31d228c6
