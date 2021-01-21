@@ -136,6 +136,7 @@ This procedure was unfortunately not used for the SAMD51 and NRF52840 below.
 * NXP i.MX RT10XX - 0x4fb2d5bd
 * NXP LPC55xx - 0x2abc77ec
 * GD32F350 - 0x31d228c6
+* Raspberry Pi RP2040 - 0xe48bff56
 
 ### Rationale
 
