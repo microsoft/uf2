@@ -66,7 +66,7 @@ struct UF2_Block {
 
 ### Flags
 
-Currently, there are three flags defined:
+Currently, there are five flags defined:
 
 * `0x00000001` - **not main flash** - this block should be skipped when writing the
   device flash; it can be used to store "comments" in the file, typically
