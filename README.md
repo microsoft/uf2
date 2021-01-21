@@ -348,6 +348,7 @@ Extension tags can, but don't have to, be repeated in all blocks.
 * [Linux (RPi Zero)](https://github.com/microsoft/uf2-linux)
 * [Cypress FX2](https://github.com/whitequark/libfx2/tree/master/firmware/boot-uf2)
 * [Tiny UF2](https://github.com/adafruit/tinyuf2) - Support ESP32-S2, iMXRT10xx, STM32F4
+* [RP2040 chip](https://www.raspberrypi.org/products/raspberry-pi-pico/) - native support in silicon
 
 There's an ongoing effort to implement UF2 in [Codal](https://github.com/lancaster-university/codal-core).
 
