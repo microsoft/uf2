@@ -359,6 +359,10 @@ There's an ongoing effort to implement UF2 in [Codal](https://github.com/lancast
 * https://makecode.seeedstudio.com
 * https://maker.makecode.com
 
+### Libraries
+
+* https://www.npmjs.com/package/uf2
+
 ## License
 
 MIT
