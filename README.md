@@ -330,7 +330,7 @@ named `ACME Toaster mk3` (line breaks added for clarity):
 
 ```
 09 bc c7 9f 30 2e 31 2e 32 00 00 00
-14 9d 9d 65 41 43 4d 45 20 54 6f 61 73 74 65 72 20 6d 6b 33
+14 9d 0d 65 41 43 4d 45 20 54 6f 61 73 74 65 72 20 6d 6b 33
 00 00 00 00
 ```
 
