@@ -277,7 +277,7 @@ Typical writing procedure is as follows:
 * make sure that `targetAddr < fileSize` and that `fileSize` isn't out of reasonable range
 * write `0x00` at `data[475]` to ensure NUL termination of file name
 * read file name from `&data[payloadSize]`; perform any mapping on the file name
-* create a directory where the file is to be written if doesn't exists
+* create a directory where the file is to be written if it doesn't exist
 * open the file for writing
 * truncate the file to `fileSize`
 * seek `targetAddr`
