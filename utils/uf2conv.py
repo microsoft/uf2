@@ -296,8 +296,9 @@ def main():
             ext = "h"
         else:
             outbuf = convert_to_uf2(inpbuf)
-        print("Converting to %s, output size: %d, start address: 0x%x" %
-              (ext, len(outbuf), appstartaddr))
+        if not args.deploy:
+            print("Converted to %s, output size: %d, start address: 0x%x" %
+                  (ext, len(outbuf), appstartaddr))
         if args.convert or ext != "uf2":
             drives = []
             if args.output == None:
