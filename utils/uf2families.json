@@ -50,7 +50,7 @@
         "description": "GD32F350"
     },
     {
-        "id": "0x4240bdf",
+        "id": "0x04240bdf",
         "short_name": "STM32L5",
         "description": "ST STM32L5xx"
     },
@@ -165,7 +165,7 @@
         "description": "Raspberry Pi RP2040"
     },
     {
-        "id": "0xff6919",
+        "id": "0x00ff6919",
         "short_name": "STM32L4",
         "description": "ST STM32L4xx"
     }
