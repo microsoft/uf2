@@ -105,39 +105,7 @@ This procedure was unfortunately not used for the SAMD51 and NRF52840 below.
 
 #### Family list
 
-* Microchip (Atmel) SAMD21 - 0x68ed2b88
-* Microchip (Atmel) SAML21 - 0x1851780a
-* Microchip (Atmel) SAMD51 - 0x55114460
-* Nordic NRF52840 - 0xada52840
-* ST STM32F0xx - 0x647824b6
-* ST STM32F103 - 0x5ee21072
-* ST STM32F2xx - 0x5d1a0a2e
-* ST STM32F3xx - 0x6b846188
-* ST STM32F401 - 0x57755a57
-* ST STM32F407 - 0x6d0922fa
-* ST STM32F407VG - 0x8fb060fe
-* ST STM32F7xx - 0x53b80f00
-* ST STM32G0xx - 0x300f5633
-* ST STM32G4xx - 0x4c71240a
-* ST STM32H7xx - 0x6db66082
-* ST STM32L0xx - 0x202e3a91
-* ST STM32L1xx - 0x1e1f432d
-* ST STM32L4xx - 0x00ff6919
-* ST STM32L5xx - 0x04240bdf
-* ST STM32WBxx - 0x70d16653
-* ST STM32WLxx - 0x21460ff0
-* Microchip (Atmel) ATmega32 - 0x16573617
-* Cypress FX2 - 0x5a18069b
-* ESP8266 - 0x7eab61ed
-* ESP32 - 0x1c5f21b0
-* ESP32-S2 - 0xbfdd4eee
-* ESP32-C3 - 0xd42ba06c
-* ESP32-S3 - 0xc47e5767 
-* NXP i.MX RT10XX - 0x4fb2d5bd
-* NXP LPC55xx - 0x2abc77ec
-* NXP KL32L2x - 0x7f83e793
-* GD32F350 - 0x31d228c6
-* Raspberry Pi RP2040 - 0xe48bff56
+The current master list of family IDs is maintained in a [JSON file](utils/uf2families.json).
 
 ### Rationale
 
