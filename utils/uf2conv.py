@@ -212,7 +212,7 @@ def write_file(name, buf):
 
 
 def load_families():
-    with open("uf2families.json") as f:
+    with open(os.path.join(sys.path[0], "uf2families.json")) as f:
         raw_families = json.load(f)
 
     families = {}
