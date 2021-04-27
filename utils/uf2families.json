@@ -12,11 +12,11 @@
     {
         "id": "0x1b57745f",
         "short_name": "NRF52",
-        "description": "!!!"
+        "description": "Nordic NRF52"
     },
     {
         "id": "0x1c5f21b0",
-        "short_name": "!!!",
+        "short_name": "ESP32",
         "description": "ESP32"
     },
     {
@@ -81,7 +81,7 @@
     },
     {
         "id": "0x5a18069b",
-        "short_name": "!!!",
+        "short_name": "FX2",
         "description": "Cypress FX2"
     },
     {
@@ -111,7 +111,7 @@
     },
     {
         "id": "0x6d0922fa",
-        "short_name": "!!!",
+        "short_name": "STM32F407",
         "description": "ST STM32F407"
     },
     {
@@ -126,22 +126,22 @@
     },
     {
         "id": "0x7eab61ed",
-        "short_name": "!!!",
+        "short_name": "ESP8266",
         "description": "ESP8266"
     },
     {
         "id": "0x7f83e793",
-        "short_name": "!!!",
+        "short_name": "KL32L2",
         "description": "NXP KL32L2x"
     },
     {
         "id": "0x8fb060fe",
-        "short_name": "!!!",
+        "short_name": "STM32F407VG",
         "description": "ST STM32F407VG"
     },
     {
         "id": "0xada52840",
-        "short_name": "!!!",
+        "short_name": "NRF52840",
         "description": "Nordic NRF52840"
     },
     {
@@ -151,12 +151,12 @@
     },
     {
         "id": "0xc47e5767",
-        "short_name": "!!!",
+        "short_name": "ESP32S3",
         "description": "ESP32-S3"
     },
     {
         "id": "0xd42ba06c",
-        "short_name": "!!!",
+        "short_name": "ESP32C3",
         "description": "ESP32-C3"
     },
     {
