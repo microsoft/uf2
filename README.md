@@ -5,7 +5,7 @@ UF2 is a file format, developed by Microsoft for [PXT](https://github.com/Micros
 flashing microcontrollers over MSC (Mass Storage Class; aka removable flash drive).
 
 For a more friendly explanation, check out [this blog post](https://makecode.com/blog/one-chip-to-flash-them-all).
-Also, take a look at the list of implementations at the bottom of this document.
+Also, take a look at the list of [implementations](#implementations) at the bottom of this document.
 
 ## Overview
 
@@ -318,6 +318,7 @@ Extension tags can, but don't have to, be repeated in all blocks.
 * [Cypress FX2](https://github.com/whitequark/libfx2/tree/master/firmware/boot-uf2)
 * [Tiny UF2](https://github.com/adafruit/tinyuf2) - Support ESP32-S2, iMXRT10xx, STM32F4
 * [RP2040 chip](https://www.raspberrypi.org/products/raspberry-pi-pico/) - native support in silicon
+* [UF2-ChibiOS](https://github.com/striso/uf2-ChibiOS) - Supports STM32H7
 
 There's an ongoing effort to implement UF2 in [Codal](https://github.com/lancaster-university/codal-core).
 
