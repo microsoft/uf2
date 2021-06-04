@@ -66,6 +66,20 @@ def convert_from_uf2(buf):
             outp += b"\x00\x00\x00\x00"
         outp.append(block[32 : 32 + datalen])
         curraddr = newaddr + datalen
+        if (blockno == 0):
+            print("--- UF2 File Header Info ---")
+            print("Flag is 0x{:04x}".format(hd[2]))
+            if hd[2] & 0x2000:
+                families = load_families()
+                family_short_name = ""
+                for name, value in families.items():
+                    if value == hd[7]:
+                        family_short_name = name
+                print("Family ID is {:s}, hex value is 0x{:08x}".format(family_short_name,hd[7]))
+            print("Target Address is 0x{:08x}".format(hd[3]))
+            print("Number of blocks in file is {:d}, bin size is {:d} bytes".format(hd[6],hd[6]*254))
+            print("----------------------------")
+                
     return b"".join(outp)
 
 def convert_to_carray(file_content):
@@ -253,6 +267,8 @@ def main():
                         help='specify familyID - number or name (default: 0x0)')
     parser.add_argument('-C' , '--carray', action='store_true',
                         help='convert binary file to a C array, not UF2')
+    parser.add_argument('-i', '--info', action='store_true',
+                        help='display header information from UF2, do not convert')
     args = parser.parse_args()
     appstartaddr = int(args.base, 0)
 
@@ -277,9 +293,12 @@ def main():
         ext = "uf2"
         if args.deploy:
             outbuf = inpbuf
-        elif from_uf2:
+        elif from_uf2 and not args.info:
             outbuf = convert_from_uf2(inpbuf)
             ext = "bin"
+        elif from_uf2 and args.info:
+            outbuf = ""
+            convert_from_uf2(inpbuf)
         elif is_hex(inpbuf):
             outbuf = convert_from_hex_to_uf2(inpbuf.decode("utf-8"))
         elif args.carray:
@@ -287,7 +306,7 @@ def main():
             ext = "h"
         else:
             outbuf = convert_to_uf2(inpbuf)
-        if not args.deploy:
+        if not args.deploy and not args.info:
             print("Converted to %s, output size: %d, start address: 0x%x" %
                   (ext, len(outbuf), appstartaddr))
         if args.convert or ext != "uf2":
