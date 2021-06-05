@@ -34,8 +34,13 @@ def is_hex(buf):
 
 def convert_from_uf2(buf):
     global appstartaddr
+    global familyid
     numblocks = len(buf) // 512
     curraddr = None
+    currfamilyid = None
+    families_found = {}
+    prev_flag = None
+    all_flags_same = True
     outp = []
     for blockno in range(numblocks):
         ptr = blockno * 512
@@ -51,9 +56,13 @@ def convert_from_uf2(buf):
         if datalen > 476:
             assert False, "Invalid UF2 data size at " + ptr
         newaddr = hd[3]
-        if curraddr == None:
-            appstartaddr = newaddr
+        if (hd[2] & 0x2000) and (currfamilyid == None):
+            currfamilyid = hd[7]
+        if curraddr == None or ((hd[2] & 0x2000) and hd[7] != currfamilyid):
+            currfamilyid = hd[7]
             curraddr = newaddr
+            if familyid == 0x0 or familyid == hd[7]:
+                appstartaddr = newaddr
         padding = newaddr - curraddr
         if padding < 0:
             assert False, "Block out of order at " + ptr
@@ -64,22 +73,37 @@ def convert_from_uf2(buf):
         while padding > 0:
             padding -= 4
             outp += b"\x00\x00\x00\x00"
-        outp.append(block[32 : 32 + datalen])
+        if familyid == 0x0 or ((hd[2] & 0x2000) and familyid == hd[7]):
+            outp.append(block[32 : 32 + datalen])
         curraddr = newaddr + datalen
-        if (blockno == 0):
+        if hd[2] & 0x2000:
+            if hd[7] in families_found.keys():
+                if families_found[hd[7]] > newaddr:
+                    families_found[hd[7]] = newaddr
+            else:
+                families_found[hd[7]] = newaddr
+        if prev_flag == None:
+            prev_flag = hd[2]
+        if prev_flag != hd[2]:
+            all_flags_same = False
+        if blockno == (numblocks - 1):
             print("--- UF2 File Header Info ---")
-            print("Flag is 0x{:04x}".format(hd[2]))
-            if hd[2] & 0x2000:
-                families = load_families()
+            families = load_families()
+            for family_hex in families_found.keys():
                 family_short_name = ""
                 for name, value in families.items():
-                    if value == hd[7]:
+                    if value == family_hex:
                         family_short_name = name
-                print("Family ID is {:s}, hex value is 0x{:08x}".format(family_short_name,hd[7]))
-            print("Target Address is 0x{:08x}".format(hd[3]))
-            print("Number of blocks in file is {:d}, bin size is {:d} bytes".format(hd[6],hd[6]*254))
+                print("Family ID is {:s}, hex value is 0x{:08x}".format(family_short_name,family_hex))
+                print("Target Address is 0x{:08x}".format(families_found[family_hex]))
+            if all_flags_same:
+                print("All block flag values consistent, 0x{:04x}".format(hd[2]))
+            else:
+                print("Flags were not all the same")
             print("----------------------------")
-                
+            if len(families_found) > 1 and familyid == 0x0:
+                outp = []
+                appstartaddr = 0x0
     return b"".join(outp)
 
 def convert_to_carray(file_content):
