@@ -177,7 +177,6 @@ def convert_from_hex_to_uf2(buf):
             upper = ((rec[4] << 8) | rec[5]) << 16
         elif tp == 2:
             upper = ((rec[4] << 8) | rec[5]) << 4
-            assert (upper & 0xffff) == 0
         elif tp == 1:
             break
         elif tp == 0:
