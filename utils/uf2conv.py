@@ -180,7 +180,7 @@ def convert_from_hex_to_uf2(buf):
         elif tp == 1:
             break
         elif tp == 0:
-            addr = upper | (rec[1] << 8) | rec[2]
+            addr = upper + ((rec[1] << 8) | rec[2])
             if appstartaddr == None:
                 appstartaddr = addr
             i = 4
