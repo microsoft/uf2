@@ -32,6 +32,11 @@ def is_hex(buf):
         return True
     return False
 
+def get_ext(pathname):
+    if not pathname:
+        return None
+    return os.path.splitext(pathname)[1][1:].lower()
+
 def convert_from_uf2(buf):
     global appstartaddr
     global familyid
@@ -105,6 +110,95 @@ def convert_from_uf2(buf):
                 outp = []
                 appstartaddr = 0x0
     return b"".join(outp)
+
+def convert_from_uf2_to_hex(buf):
+    global appstartaddr
+    global familyid
+    numblocks = len(buf) // 512
+    curraddr = None
+    currfamilyid = None
+    families_found = {}
+    prev_flag = None
+    all_flags_same = True
+    no_flash_block = False
+    upper = None
+    ln = os.linesep # '\r\n'
+    outp = []
+    for blockno in range(numblocks):
+        ptr = blockno * 512
+        block = buf[ptr:ptr + 512]
+        hd = struct.unpack(b"<IIIIIIII", block[0:32])
+        if hd[0] != UF2_MAGIC_START0 or hd[1] != UF2_MAGIC_START1:
+            print("Skipping block at " + ptr + "; bad magic")
+            continue
+        if hd[2] & 1:
+            # NO-flash flag set; skip block
+            no_flash_block = True
+            continue
+        datalen = hd[4]
+        if datalen > 476:
+            assert False, "Invalid UF2 data size at " + ptr
+        newaddr = hd[3]
+        if (hd[2] & 0x2000) and (currfamilyid == None):
+            currfamilyid = hd[7]
+        if curraddr == None or ((hd[2] & 0x2000) and hd[7] != currfamilyid):
+            currfamilyid = hd[7]
+            curraddr = newaddr
+            if familyid == 0x0 or familyid == hd[7]:
+                appstartaddr = newaddr
+        if familyid == 0x0 or ((hd[2] & 0x2000) and familyid == hd[7]):
+            if newaddr & 0xf != 0 or datalen & 0xf != 0:
+                assert False, "Block address and size must be 16 bytes aligned"
+            addr = newaddr
+            while addr < newaddr + datalen:
+                if (addr >> 16) != 0 or upper != None:
+                    if upper == None or (addr >> 16) != upper:
+                        upper = (addr >> 16)
+                        if upper < 16:
+                            rec = bytes([2,0,0,2,upper << 4,0])
+                        else:
+                            rec = bytes([2,0,0,4,(upper >> 8) & 0xff, upper & 0xff])
+                        rec += bytes([-sum(rec) & 0xff])
+                        outp.append(":" + rec.hex().upper() + ln)
+                rlen = 16
+                rec = bytes([rlen, (addr >> 8) & 0xff, addr & 0xff, 0])
+                rec += block[32 + addr - newaddr : 32 + addr - newaddr + rlen]
+                rec += bytes([-sum(rec) & 0xff])
+                outp.append(":" + rec.hex().upper() + ln)
+                addr += rlen
+        curraddr = newaddr + datalen
+        if hd[2] & 0x2000:
+            if hd[7] in families_found.keys():
+                if families_found[hd[7]] > newaddr:
+                    families_found[hd[7]] = newaddr
+            else:
+                families_found[hd[7]] = newaddr
+        if prev_flag == None:
+            prev_flag = hd[2]
+        if prev_flag != hd[2]:
+            all_flags_same = False
+        if blockno == (numblocks - 1):
+            print("--- UF2 File Header Info ---")
+            families = load_families()
+            for family_hex in families_found.keys():
+                family_short_name = ""
+                for name, value in families.items():
+                    if value == family_hex:
+                        family_short_name = name
+                print("Family ID is {:s}, hex value is 0x{:08x}".format(family_short_name,family_hex))
+                print("Target Address is 0x{:08x}".format(families_found[family_hex]))
+            if all_flags_same:
+                print("All block flag values consistent, 0x{:04x}".format(hd[2]))
+            else:
+                print("Flags were not all the same")
+            print("----------------------------")
+            if no_flash_block:
+                print("NO-flash blocks were omitted")
+            if len(families_found) > 1 and familyid == 0x0:
+                print("Output includes blocks from multiple target families")
+    # EOF record
+    outp.append(":00000001FF" + ln)
+    return bytes("".join(outp), 'ascii')
 
 def convert_to_carray(file_content):
     outp = "const unsigned long bindata_len = %d;\n" % len(file_content)
@@ -316,6 +410,9 @@ def main():
         ext = "uf2"
         if args.deploy:
             outbuf = inpbuf
+        elif from_uf2 and not args.info and get_ext(args.output) == 'hex':
+            outbuf = convert_from_uf2_to_hex(inpbuf)
+            ext = "hex"
         elif from_uf2 and not args.info:
             outbuf = convert_from_uf2(inpbuf)
             ext = "bin"
@@ -332,9 +429,9 @@ def main():
         if not args.deploy and not args.info:
             print("Converted to %s, output size: %d, start address: 0x%x" %
                   (ext, len(outbuf), appstartaddr))
-        if args.convert or ext != "uf2":
+        if args.convert or args.info or ext != "uf2":
             drives = []
-            if args.output == None:
+            if args.output == None and not args.info:
                 args.output = "flash." + ext
         else:
             drives = get_drives()
@@ -342,7 +439,7 @@ def main():
         if args.output:
             write_file(args.output, outbuf)
         else:
-            if len(drives) == 0:
+            if len(drives) == 0 and not args.info:
                 error("No drive to deploy.")
         for d in drives:
             print("Flashing %s (%s)" % (d, board_id(d)))
