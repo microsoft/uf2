@@ -95,6 +95,11 @@
         "description": "ST STM32F103"
     },
     {
+        "id": "0x621e937a",
+        "short_name": "NRF52833",
+        "description": "Nordic NRF52833"
+    },
+    {
         "id": "0x647824b6",
         "short_name": "STM32F0",
         "description": "ST STM32F0xx"
