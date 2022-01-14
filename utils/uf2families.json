@@ -165,6 +165,16 @@
         "description": "ESP32-C3"
     },
     {
+        "id": "0x2b88d29c",
+        "short_name": "ESP32C2",
+        "description": "ESP32-C2"
+    },
+    {
+        "id": "0x332726f6",
+        "short_name": "ESP32H2",
+        "description": "ESP32-H2"
+    },
+    {
         "id": "0xe48bff56",
         "short_name": "RP2040",
         "description": "Raspberry Pi RP2040"
