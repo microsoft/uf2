@@ -183,5 +183,10 @@
         "id": "0x00ff6919",
         "short_name": "STM32L4",
         "description": "ST STM32L4xx"
+    },
+    {
+        "id": "0x9af03e33",
+        "short_name": "GD32VF103",
+        "description": "GigaDevice GD32VF103"
     }
 ]
