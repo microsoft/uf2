@@ -5,10 +5,10 @@
 **uf2conv.py** [-h] [-l]
 
 **uf2conv.py** [-b BASE] [-f FAMILY] [-o FILE] [-d DEVICE_PATH] [-l] [-c] [-D]
-               [-C]
+               [-w] [-C]
                [HEX or BIN FILE]
 
-**uf2conv.py** [-c] [-D] [-i] [UF2 FILE]
+**uf2conv.py** [-c] [-D] [-w] [-i] [UF2 FILE]
 
 ## DESCRIPTION
 
@@ -55,6 +55,9 @@
 `--deploy`
 : just flash, do not convert
 
+`-w`
+`--wait`
+: wait for device to flash
 
 `-C`
 `--carray`

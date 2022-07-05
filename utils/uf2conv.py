@@ -7,6 +7,7 @@ import os
 import os.path
 import argparse
 import json
+from time import sleep
 
 
 UF2_MAGIC_START0 = 0x0A324655 # "UF2\n"
@@ -288,6 +289,8 @@ def main():
                         help='do not flash, just convert')
     parser.add_argument('-D', '--deploy', action='store_true',
                         help='just flash, do not convert')
+    parser.add_argument('-w', '--wait', action='store_true',
+                        help='wait for device to flash')
     parser.add_argument('-C', '--carray', action='store_true',
                         help='convert binary file to a C array, not UF2')
     parser.add_argument('-i', '--info', action='store_true',
@@ -339,8 +342,14 @@ def main():
             write_file(args.output, outbuf)
         if ext == "uf2" and not args.convert and not args.info:
             drives = get_drives()
-            if len(drives) == 0 and not args.output:
-                error("No drive to deploy.")
+            if len(drives) == 0:
+                if args.wait:
+                    print("Waiting for drive to deploy...")
+                    while len(drives) == 0:
+                        sleep(0.1)
+                        drives = get_drives()
+                elif not args.output:
+                    error("No drive to deploy.")
             for d in drives:
                 print("Flashing %s (%s)" % (d, board_id(d)))
                 write_file(d + "/NEW.UF2", outbuf)
