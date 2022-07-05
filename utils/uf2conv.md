@@ -2,11 +2,13 @@
 
 ## SYNOPSIS
 
-**uf2conv.py** [-h] [-b BASE] [-o FILE] [-d DEVICE_PATH] [-l] [-c] [-D]
-                    [-f FAMILY] [-C]
-                    [HEX or BIN FILE]
+**uf2conv.py** [-h] [-l]
 
-**uf2conv.py** [-c] [UF2 FILE]
+**uf2conv.py** [-b BASE] [-f FAMILY] [-o FILE] [-d DEVICE_PATH] [-l] [-c] [-D]
+               [-C]
+               [HEX or BIN FILE]
+
+**uf2conv.py** [-c] [-D] [-i] [UF2 FILE]
 
 ## DESCRIPTION
 
@@ -29,6 +31,10 @@
 `--base`
 : set base address of application for BIN format (default: 0x2000)
 
+`-f`
+`--family`
+: specify familyID - number or name (default: 0x0)
+
 `-o`
 `--output`
 : write output to named file (defaults to "flash.uf2" or "flash.bin" where sensible)
@@ -49,10 +55,11 @@
 `--deploy`
 : just flash, do not convert
 
-`-f`
-`--family`
-: specify familyID - number or name (default: 0x0)
 
 `-C`
 `--carray`
 : convert binary file to a C array, not UF2
+
+`-i`
+`--info`
+: display header information from UF2, do not convert
