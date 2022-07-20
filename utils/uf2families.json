@@ -77,7 +77,7 @@
     {
         "id": "0x57755a57",
         "short_name": "STM32F4",
-        "description": "ST STM32F401"
+        "description": "ST STM32F4xx"
     },
     {
         "id": "0x5a18069b",
