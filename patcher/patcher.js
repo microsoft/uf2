@@ -1,8 +1,8 @@
 "use strict";
 
 // copy entire configkeys.h from https://github.com/microsoft/pxt-common-packages/blob/master/libs/base/configkeys.h
-const CONFIG_KEYS_H = 
-`
+const CONFIG_KEYS_H =
+    `
 #ifndef __PXT_CONFIGKEYS_H
 #define __PXT_CONFIGKEYS_H
 
@@ -344,6 +344,38 @@ const CONFIG_KEYS_H =
 #define CFG_PIN_P29 429
 #define CFG_PIN_P30 430
 #define CFG_PIN_P31 431
+#define CFG_PIN_P32 432
+#define CFG_PIN_P33 433
+#define CFG_PIN_P34 434
+#define CFG_PIN_P35 435
+#define CFG_PIN_P36 436
+#define CFG_PIN_P37 437
+#define CFG_PIN_P38 438
+#define CFG_PIN_P39 439
+#define CFG_PIN_P40 440
+#define CFG_PIN_P41 441
+#define CFG_PIN_P42 442
+#define CFG_PIN_P43 443
+#define CFG_PIN_P44 444
+#define CFG_PIN_P45 445
+#define CFG_PIN_P46 446
+#define CFG_PIN_P47 447
+#define CFG_PIN_P48 448
+#define CFG_PIN_P49 449
+#define CFG_PIN_P50 450
+#define CFG_PIN_P51 451
+#define CFG_PIN_P52 452
+#define CFG_PIN_P53 453
+#define CFG_PIN_P54 454
+#define CFG_PIN_P55 455
+#define CFG_PIN_P56 456
+#define CFG_PIN_P57 457
+#define CFG_PIN_P58 458
+#define CFG_PIN_P59 459
+#define CFG_PIN_P60 460
+#define CFG_PIN_P61 461
+#define CFG_PIN_P62 462
+#define CFG_PIN_P63 463
 
 #define CFG_PIN_LORA_MISO 1001
 #define CFG_PIN_LORA_MOSI 1002
@@ -390,6 +422,57 @@ const CONFIG_KEYS_H =
 #define CFG_PIN_GROVE1 1041
 #define CFG_PIN_SS 1042
 
+// Adafruit Grand Central M4
+#define CFG_PIN_D33 183
+#define CFG_PIN_D34 184
+#define CFG_PIN_D35 185
+#define CFG_PIN_D36 186
+#define CFG_PIN_D37 187
+#define CFG_PIN_D38 188
+#define CFG_PIN_D39 189
+#define CFG_PIN_D40 190
+#define CFG_PIN_D41 191
+#define CFG_PIN_D42 192
+#define CFG_PIN_D43 193
+#define CFG_PIN_D44 194
+#define CFG_PIN_D45 195
+#define CFG_PIN_D46 196
+#define CFG_PIN_D47 197
+#define CFG_PIN_D48 198
+#define CFG_PIN_D49 199
+#define CFG_PIN_D50 259
+#define CFG_PIN_D51 260
+#define CFG_PIN_D52 261
+#define CFG_PIN_D53 262
+
+#define CFG_PIN_TX1 263
+#define CFG_PIN_TX2 264
+#define CFG_PIN_TX3 265
+#define CFG_PIN_RX1 266
+#define CFG_PIN_RX2 267
+#define CFG_PIN_RX3 268
+#define CFG_PIN_SCL1 269
+#define CFG_PIN_SDA1 270
+#define CFG_PIN_PCC_D0 271
+#define CFG_PIN_PCC_D1 272
+#define CFG_PIN_PCC_D2 273
+#define CFG_PIN_PCC_D3 274
+#define CFG_PIN_PCC_D4 275
+#define CFG_PIN_PCC_D5 276
+#define CFG_PIN_PCC_D6 277
+#define CFG_PIN_PCC_D7 278
+#define CFG_PIN_PCC_D8 279
+#define CFG_PIN_PCC_D9 280
+#define CFG_PIN_PCC_D10 281
+#define CFG_PIN_PCC_D11 282
+#define CFG_PIN_PCC_D12 283
+#define CFG_PIN_PCC_D13 284
+#define CFG_PIN_CC_DEN1 285
+#define CFG_PIN_CC_DEN2 286
+#define CFG_PIN_CC_CLK 287
+#define CFG_PIN_XCC_CLK 288
+
+
 #define CFG_PIN_JDPWR_PRE_SENSE 1100
 #define CFG_PIN_JDPWR_GND_SENSE 1101
 #define CFG_PIN_JDPWR_PULSE 1102
@@ -401,7 +484,7 @@ const CONFIG_KEYS_H =
 `
 
 const configKeys = {}
-CONFIG_KEYS_H.replace(/#define\s+CFG_(\w+)\s+(\w+)/g, function(m, name, value) {
+CONFIG_KEYS_H.replace(/#define\s+CFG_(\w+)\s+(\w+)/g, function (m, name, value) {
     configKeys[name] = parseInt(value);
     return "";
 })
@@ -708,7 +791,12 @@ function readWriteConfig(buf, patch) {
                     log(`Found CFG DATA at ${addrS}`)
                     patchPtr = -4
                 } else {
-                    log(`Skipping second CFG DATA at ${addrS}`)
+                    if (patch) {
+                        log(`Also patching at ${addrS}`)
+                        patchPtr = -4
+                    } else {
+                        log(`Skipping second CFG DATA at ${addrS}`)
+                    }
                 }
             }
 
@@ -870,6 +958,8 @@ function parsePinName(v, portSize) {
     let pin = -1
 
     v = v.trim()
+
+    v = v.replace(/^DAL\./, "")
 
     const env = enums["."][v]
     if (env !== undefined)
