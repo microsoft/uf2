@@ -198,5 +198,10 @@
         "id": "0x6e7348a8",
         "short_name": "CSK6",
         "description": "LISTENAI CSK60xx"
+    },
+    {
+        "id": "0x11de784a",
+        "short_name": "M0SENSE",
+        "description": "M0SENSE BL702"
     }
 ]
