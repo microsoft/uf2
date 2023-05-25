@@ -212,15 +212,17 @@ def get_drives():
             if len(words) >= 3 and words[1] == "2" and words[2] == "FAT":
                 drives.append(words[0])
     else:
-        rootpath = "/media"
+        searchpaths = ["/media"]
         if sys.platform == "darwin":
-            rootpath = "/Volumes"
+            searchpaths = ["/Volumes"]
         elif sys.platform == "linux":
-            tmp = rootpath + "/" + os.environ["USER"]
-            if os.path.isdir(tmp):
-                rootpath = tmp
-        for d in os.listdir(rootpath):
-            drives.append(os.path.join(rootpath, d))
+            searchpaths += ["/media/" + os.environ["USER"], '/run/media/' + os.environ["USER"]]
+
+        for rootpath in searchpaths:
+            if os.path.isdir(rootpath):
+                for d in os.scandir(rootpath):
+                    if d.is_dir():
+                        drives.append(d.path)
 
 
     def has_info(d):
