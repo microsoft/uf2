@@ -220,9 +220,9 @@ def get_drives():
 
         for rootpath in searchpaths:
             if os.path.isdir(rootpath):
-                for d in os.scandir(rootpath):
-                    if d.is_dir():
-                        drives.append(d.path)
+                for d in os.listdir(rootpath):
+                    if os.path.isdir(rootpath):
+                        drives.append(os.path.join(rootpath, d))
 
 
     def has_info(d):
