@@ -223,5 +223,25 @@
         "id": "0x9517422f",
         "short_name": "RZA1LU",
         "description": "Renesas RZ/A1LU (R7S7210xx)"
+    },
+    {
+        "id": "0x2dc309c5",
+        "short_name": "STM32F411xE",
+        "description": "ST STM32F411xE"
+    },
+    {
+        "id": "0x06d1097b",
+        "short_name": "STM32F411xC",
+        "description": "ST STM32F411xC"
+    },
+    {
+        "id": "0x72721d4e",
+        "short_name": "NRF52832xxAA",
+        "description": "Nordic NRF52832xxAA"
+    },
+    {
+        "id": "0x6f752678",
+        "short_name": "NRF52832xxAB",
+        "description": "Nordic NRF52832xxAB"
     }
 ]
