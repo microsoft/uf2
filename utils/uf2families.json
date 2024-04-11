@@ -253,5 +253,10 @@
         "id": "0x6f752678",
         "short_name": "NRF52832xxAB",
         "description": "Nordic NRF52832xxAB"
+    },
+    {
+        "id": "0xa0c97b8e",
+        "short_name": "AT32F415",
+        "description": "ArteryTek AT32F415"
     }
 ]
