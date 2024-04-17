@@ -258,5 +258,10 @@
         "id": "0xa0c97b8e",
         "short_name": "AT32F415",
         "description": "ArteryTek AT32F415"
+    },
+    {
+        "id": "0x699b62ec",
+        "short_name": "CH32V",
+        "description": "WCH CH32V2xx and CH32V3xx"
     }
 ]
