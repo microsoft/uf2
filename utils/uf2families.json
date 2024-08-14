@@ -288,5 +288,10 @@
         "id": "0x699b62ec",
         "short_name": "CH32V",
         "description": "WCH CH32V2xx and CH32V3xx"
+    },
+    {
+        "id": "0x7be8976d",
+        "short_name": "RA4M1",
+        "description": "Renesas RA4M1"
     }
 ]
