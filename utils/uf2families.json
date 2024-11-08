@@ -145,6 +145,11 @@
         "description": "ST STM32F407"
     },
     {
+        "id": "0x4e8f1c5d",
+        "short_name": "STM32H5",
+        "description": "ST STM32H5xx"
+    },
+    {
         "id": "0x6db66082",
         "short_name": "STM32H7",
         "description": "ST STM32H7xx"
