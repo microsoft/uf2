@@ -190,6 +190,11 @@
         "description": "Nordic NRF52840"
     },
     {
+        "id": "0x820d9a5f",
+        "short_name": "NRF52820",
+        "description": "Nordic NRF52820_xxAA"
+    },
+    {
         "id": "0xbfdd4eee",
         "short_name": "ESP32S2",
         "description": "ESP32-S2"
