@@ -23,19 +23,106 @@
       padding: 2rem 2rem !important;
     }
 
-    .btn-dl,
-    .btn-dl:hover {
+    .btn-dl{
       background-color: green;
       float: right;
       color: white;
     }
 
-    footer {
-      text-align: center;
-      margin-top: 5em;
+    .btn-dl:hover{
+      background: rgb(33, 173, 33);
     }
-    footer a {
-      margin-right: 2em;
+
+    footer {
+  background-color: #f8f9fa;
+  padding: 1.5em 0;
+  text-align: center;
+  font-size: 14px;
+  color: #333;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 2em;
+}
+
+footer a {
+  color: #007bff;
+  text-decoration: none;
+  margin: 0 1em;
+  transition: color 0.3s;
+}
+
+footer a:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+footer span {
+  display: block;
+  margin-top: 1em;
+  font-size: 13px;
+  color: #666;
+}
+
+    #patch{
+      margin: 34px 0px;
+    }
+
+    .learnMore{
+      font-size: 16px;
+    }
+
+
+.btn-generate {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: green;
+  color: white;
+  font-size: 16px;
+  text-align: center;
+  border-radius: 5px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.btn-generate:hover {
+  background-color: rgb(33, 173, 33);
+}
+
+#rnd-res {
+  display: inline-block;
+  margin-left: 15px;
+  font-weight: bold;
+  color: #333;
+}
+
+    @media (max-width:768px){
+.learnMore{
+  font-size: 12px;
+}
+      footer {
+    padding: 1em;
+    font-size: 12px;
+  }
+  footer a {
+    margin: 0.5em 0;
+  }
+  footer span {
+    margin-top: 0.5em;
+  }
+      .main-content h2{
+        text-align: center;
+      }
+
+      .btn-dl{
+        text-align: center;
+      }
+      .btn-generate{
+        font-size: 13px;
+      }
+      .main-content pre code{
+        font-size: 12px;
+      }
     }
   </style>
 </head>
@@ -47,28 +134,28 @@
 
   <section class="main-content">
     <h2>Your patch</h2>
-    <textarea id="patch" spellcheck=false onchange="savePatch(event);"></textarea>
+    <textarea id="patch" spellcheck=false onchange="savePatch(event);" placeholder="Enter here..."></textarea>
     <a href="#" id="apply" class="btn btn-dl">Apply my patch</a>
 
-    <h2>Information</h2>
+    <h2 class="infohead">Information</h2>
     <pre><code id="currconfig">Drop UF2 or BIN file above to see its config.</code></pre>
 
-    <p>
+    <p class="learnMore">
       <a href="https://github.com/Microsoft/uf2/blob/master/cf2.md">Learn more</a>
       or
       <a href="#" onclick="defines()">download configkeys.h</a>.
     </p>
 
     <p>
-      <a href="#" id="rnd">Generate random number</a>
+      <a href="#" id="rnd" class="btn btn-generate">Generate random number</a>
       <span id="rnd-res"></span>
     </p>
 
 
   <footer>
-    <a href="https://makecode.com/privacy" target="_blank" rel="noopener">Privacy &amp; Cookies</a>
-    <a href="https://makecode.com/termsofuse" target="_blank" rel="noopener"> Terms Of Use</a>
-    <a href="https://makecode.com/trademarks" target="_blank" rel="noopener">Trademarks</a>
+    <a href="https://makecode.com/privacy" target="_blank" rel="noopener">Privacy &amp; Cookies</a> |
+    <a href="https://makecode.com/termsofuse" target="_blank" rel="noopener"> Terms Of Use</a> |
+    <a href="https://makecode.com/trademarks" target="_blank" rel="noopener">Trademarks</a> |
     <span>© 2019 Microsoft</span>
   </footer>
 
