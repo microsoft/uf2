@@ -141,9 +141,9 @@ def convert_to_uf2(file_content):
     return b"".join(outp)
 
 class Block:
-    def __init__(self, addr):
+    def __init__(self, addr, default_data=0xFF):
         self.addr = addr
-        self.bytes = bytearray(256)
+        self.bytes = bytearray([default_data] * 256)
 
     def encode(self, blockno, numblocks):
         global familyid
