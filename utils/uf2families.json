@@ -358,5 +358,25 @@
         "id": "0x7be8976d",
         "short_name": "RA4M1",
         "description": "Renesas RA4M1"
+    },
+    {
+        "id": "0x7410520a",
+        "short_name": "MAX32690",
+        "description": "Analog Devices MAX32690"
+    },
+    {
+        "id": "0xd63f8632",
+        "short_name": "MAX32650",
+        "description": "Analog Devices MAX32650/1/2"
+    },
+    {
+        "id": "0xf0c30d71",
+        "short_name": "MAX32666",
+        "description": "Analog Devices MAX32665/6"
+    },
+    {
+        "id": "0x91d3fd18",
+        "short_name": "MAX78002",
+        "description": "Analog Devices MAX78002"
     }
 ]
