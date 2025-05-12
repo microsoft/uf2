@@ -220,7 +220,7 @@ This is particularly useful with the source embedding (see above).
 
 It is also possible to use the UF2 format as a container for one or more
 regular files (akin to a TAR file, or ZIP archive without compression).  This
-is useful when the embedded device being flashed sports a file system.
+is useful when the embedded device being flashed supports a file system.
 
 The program to run may reside in one of the files, or in the main flash memory.
 
