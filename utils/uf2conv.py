@@ -207,11 +207,9 @@ def get_drives():
         r = subprocess.check_output([
             "powershell",
             "-Command",
-            '(Get-WmiObject Win32_LogicalDisk -Filter "VolumeName=\'RPI-RP2\'").DeviceID'
+            '(Get-WmiObject Win32_LogicalDisk -Filter "FileSystem=\'FAT\'").DeviceID'
             ])
-        drive = to_str(r).strip()
-        if drive:
-            drives.append(drive)
+        drives = [drive.strip() for drive in to_str(r).splitlines()]
     else:
         searchpaths = ["/mnt", "/media"]
         if sys.platform == "darwin":
