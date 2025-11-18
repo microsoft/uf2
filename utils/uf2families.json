@@ -378,5 +378,10 @@
         "id": "0x91d3fd18",
         "short_name": "MAX78002",
         "description": "Analog Devices MAX78002"
+    },
+    {
+        "id": "0x7d7a66ef",
+        "short_name": "PY32F071-UVK5-V3",
+        "description": "Quansheng UV-K5 V3 amateur radio based on Puya Semiconductor PY32F071"
     }
 ]
