@@ -250,6 +250,11 @@
         "description": "ESP32-H4"
     },
     {
+        "id": "0x3101f7c1",
+        "short_name": "ESP32S31",
+        "description": "ESP32-S31"
+    },
+    {
         "id": "0xde1270b7",
         "short_name": "BL602",
         "description": "Boufallo 602"
