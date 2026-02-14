@@ -155,6 +155,11 @@
         "description": "ST STM32H7xx"
     },
     {
+        "id": "0x6db66083",
+        "short_name": "STM32H7RS",
+        "description": "ST STM32H7RSxx"
+    },
+    {
         "id": "0x70d16653",
         "short_name": "STM32WB",
         "description": "ST STM32WBxx"
