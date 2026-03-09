@@ -73,7 +73,7 @@ def convert_from_uf2(buf):
             assert False, "Non-word padding size at " + ptr
         while padding > 0:
             padding -= 4
-            outp.append(b"\x00\x00\x00\x00")
+            outp.append(b"\xFF\xFF\xFF\xFF")
         if familyid == 0x0 or ((hd[2] & 0x2000) and familyid == hd[7]):
             outp.append(block[32 : 32 + datalen])
         curraddr = newaddr + datalen
@@ -121,7 +121,7 @@ def convert_to_uf2(file_content):
     global familyid
     datapadding = b""
     while len(datapadding) < 512 - 256 - 32 - 4:
-        datapadding += b"\x00\x00\x00\x00"
+        datapadding += b"\xFF\xFF\xFF\xFF"
     numblocks = (len(file_content) + 255) // 256
     outp = []
     for blockno in range(numblocks):
