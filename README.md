@@ -43,7 +43,7 @@ All fields, except for data, are 32 bit unsigned little endian integers.
 | 20     | 4    | Sequential block number; starts at 0              |
 | 24     | 4    | Total number of blocks in file                    |
 | 28     | 4    | File size or board family ID or zero              |
-| 32     | 476  | Data, padded with zeros                           |
+| 32     | 476  | Data, padded with `0xFF`                          |
 | 508    | 4    | Final magic number, `0x0AB16F30`                  |
 
 The following C struct can be used:
@@ -284,7 +284,8 @@ The first byte of tag contains its total size in bytes (including the size byte
 and type designation).
 The next three bytes designate the type of tag (if you want to define custom
 tags, pick them at random).
-The last tag has size of `0` and type of `0`.
+The last tag has a size of `0xFF` and a type of `0xFFFFFF`, which does match padding data.
+For backward compatibility, also (size `0x00` and type `0x000000`) should be considered as last tag marker.
 
 Standard tag designations follow:
 * `0x9fc7bc` - version of firmware file - UTF8 semver string
@@ -300,7 +301,7 @@ named `ACME Toaster mk3` (line breaks added for clarity):
 ```
 09 bc c7 9f 30 2e 31 2e 32 00 00 00
 14 9d 0d 65 41 43 4d 45 20 54 6f 61 73 74 65 72 20 6d 6b 33
-00 00 00 00
+FF FF FF FF
 ```
 
 Extension tags can, but don't have to, be repeated in all blocks.
