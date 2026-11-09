@@ -360,6 +360,11 @@
         "description": "WCH CH32V2xx and CH32V3xx"
     },
     {
+        "id": "0x7b8c32a7",
+        "short_name": "CH32V4X7",
+        "description": "WCH CH32V407 and CH32V467"
+    },
+    {
         "id": "0x7be8976d",
         "short_name": "RA4M1",
         "description": "Renesas RA4M1"
