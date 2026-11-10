@@ -1,0 +1,34 @@
+name: Validate JSON
+
+on:
+  push:
+    paths:
+      - '**.json'
+      - '.github/workflows/validate-json.yml'
+  pull_request:
+    paths:
+      - '**.json'
+      - '.github/workflows/validate-json.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-json:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check all JSON files parse
+        run: |
+          status=0
+          while IFS= read -r -d '' file; do
+            if jq empty "$file"; then
+              echo "OK: $file"
+            else
+              echo "::error file=$file::Invalid JSON in $file"
+              status=1
+            fi
+          done < <(git ls-files -z '*.json')
+          exit $status
