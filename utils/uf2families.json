@@ -395,7 +395,7 @@
         "description": "Quansheng UV-K5 V3 amateur radio based on Puya Semiconductor PY32F071"
     },
     {
-        "id": "0xf4b47471"
+        "id": "0xf4b47471",
         "short_name": "Adaboot",
         "description": "Adafruit maintained MCUboot+UF2 bootloader that manages board checks using extension tags"
     }
