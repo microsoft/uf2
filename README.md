@@ -87,12 +87,9 @@ board family isn't listed here, pick a new family ID at random. It's good
 to also send a PR here, so your family can be listed.
 
 If the `familyID` doesn't match, the bootloader should disregard the
-entire block, including `blockNo` and `numBlocks` fields.
+entire block.
 In particular, writing a full UF2 file with non-matching `familyID`
 should not reset the board.
-This also allows for several files with different `familyID` to be
-simply concatenated together, and the whole resulting file to be copied
-to the device with only one actually being written to flash.
 
 #### Picking numbers at random
 
@@ -106,6 +103,14 @@ This procedure was unfortunately not used for the SAMD51 and NRF52840 below.
 #### Family list
 
 The current master list of family IDs is maintained in a [JSON file](utils/uf2families.json).
+
+### BlockNo and Total Blocks
+
+`blockNo` must be sequencial and smaller then `numBlocks`.
+
+The `blockNo` is permitted to reset to `0` if also `familyId` changes. However,
+`numBlocks` must remain consistent; a new value is only permitted during the
+reset of `blockNo`.
 
 ### Rationale
 
@@ -124,11 +129,15 @@ supported in future, as well as for simplicity. Little endian is used, as most
 microcontrollers are little endian. 8 bit microcontrollers can choose to just
 use the first 16 bits of various header fields.
 
-The total number of blocks in the file and the sequential block number make it
+The total number of blocks in the file (per `familyId`) and the sequential block number make it
 easy for the bootloader to detect that all blocks have been transferred. It
 requires one bit of memory per block (eg., on SAMD21G18A it's 128 bytes).
 Alternatively, the bootloader might ignore that and just implement a reset
 after say 1 second break in incoming UF2 blocks.
+
+To concatenate multiple UF2 files with varying `familyId`, the `blockNo` and
+`numBlocks` may reset. Consequently, the concatenated UF2 file can be copied
+to the device, and only one file will be actually written to the flash.
 
 ### Payload sizes
 
