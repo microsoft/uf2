@@ -48,7 +48,7 @@ def convert_from_uf2(buf):
         block = buf[ptr:ptr + 512]
         hd = struct.unpack(b"<IIIIIIII", block[0:32])
         if hd[0] != UF2_MAGIC_START0 or hd[1] != UF2_MAGIC_START1:
-            print("Skipping block at " + ptr + "; bad magic")
+            print("Skipping block at 0x{:08x}; bad magic".format(ptr))
             continue
         if hd[2] & 1:
             # NO-flash flag set; skip block
@@ -65,12 +65,9 @@ def convert_from_uf2(buf):
             if familyid == 0x0 or familyid == hd[7]:
                 appstartaddr = newaddr
         padding = newaddr - curraddr
-        if padding < 0:
-            assert False, "Block out of order at " + ptr
-        if padding > 10*1024*1024:
-            assert False, "More than 10M of padding needed at " + ptr
-        if padding % 4 != 0:
-            assert False, "Non-word padding size at " + ptr
+        assert padding >= 0, "Block out of order at 0x{:08x}: new address 0x{:08x}, old address 0x{:08x}".format(ptr, newaddr, curraddr)
+        assert padding <= 10*1024*1024, "More than 10M of padding needed at 0x{:08x}: new address 0x{:08x}, old address 0x{:08x}".format(ptr, newaddr, curraddr)
+        assert padding % 4 == 0, "Non-word padding size at 0x{:08x}: new address 0x{:08x}, old address 0x{:08x}".format(ptr, newaddr, curraddr)
         while padding > 0:
             padding -= 4
             outp.append(b"\x00\x00\x00\x00")
