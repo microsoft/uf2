@@ -33,15 +33,8 @@ def is_hex(buf):
         return True
     return False
 
-def convert_from_uf2(buf):
-    global appstartaddr
-    global familyid
+def uf2_blocks(buf):
     numblocks = len(buf) // 512
-    curraddr = None
-    currfamilyid = None
-    families_found = {}
-    prev_flag = None
-    all_flags_same = True
     outp = []
     for blockno in range(numblocks):
         ptr = blockno * 512
@@ -50,6 +43,42 @@ def convert_from_uf2(buf):
         if hd[0] != UF2_MAGIC_START0 or hd[1] != UF2_MAGIC_START1:
             print("Skipping block at " + ptr + "; bad magic")
             continue
+        outp.append(block)
+    return outp
+
+def concat_uf2(buf):
+    blocks = uf2_blocks(buf)
+    numblocks = {}
+    for block in blocks:
+        hd = struct.unpack(b"<IIIIIIII", block[0:32])
+        fam = hd[7]
+        if fam not in numblocks: numblocks[fam] = 0
+        numblocks[fam] += 1
+
+    blockno = {}
+    outp = []
+    for block in blocks:
+        hd = struct.unpack(b"<IIIIIIII", block[0:32])
+        fam = hd[7]
+        if fam not in blockno: blockno[fam] = 0
+        newblock = block[0:5*4] + struct.pack(b"<II", blockno[fam], numblocks[fam]) + block[7*4:]
+        outp.append(newblock)
+        blockno[fam] += 1
+    return b"".join(outp)
+
+def convert_from_uf2(buf):
+    global appstartaddr
+    global familyid
+    curraddr = None
+    currfamilyid = None
+    families_found = {}
+    prev_flag = None
+    all_flags_same = True
+    outp = []
+    ptr = 0
+    for block in uf2_blocks(buf):
+        ptr += 512
+        hd = struct.unpack(b"<IIIIIIII", block[0:32])
         if hd[2] & 1:
             # NO-flash flag set; skip block
             continue
@@ -87,24 +116,25 @@ def convert_from_uf2(buf):
             prev_flag = hd[2]
         if prev_flag != hd[2]:
             all_flags_same = False
-        if blockno == (numblocks - 1):
-            print("--- UF2 File Header Info ---")
-            families = load_families()
-            for family_hex in families_found.keys():
-                family_short_name = ""
-                for name, value in families.items():
-                    if value == family_hex:
-                        family_short_name = name
-                print("Family ID is {:s}, hex value is 0x{:08x}".format(family_short_name,family_hex))
-                print("Target Address is 0x{:08x}".format(families_found[family_hex]))
-            if all_flags_same:
-                print("All block flag values consistent, 0x{:04x}".format(hd[2]))
-            else:
-                print("Flags were not all the same")
-            print("----------------------------")
-            if len(families_found) > 1 and familyid == 0x0:
-                outp = []
-                appstartaddr = 0x0
+
+    print("--- UF2 File Header Info ---")
+    families = load_families()
+    for family_hex in families_found.keys():
+        family_short_name = ""
+        for name, value in families.items():
+            if value == family_hex:
+                family_short_name = name
+        print("Family ID is {:s}, hex value is 0x{:08x}".format(family_short_name,family_hex))
+        print("Target Address is 0x{:08x}".format(families_found[family_hex]))
+    if all_flags_same:
+        print("All block flag values consistent, 0x{:04x}".format(hd[2]))
+    else:
+        print("Flags were not all the same")
+    print("----------------------------")
+    if len(families_found) > 1 and familyid == 0x0:
+        outp = []
+        appstartaddr = 0x0
+
     return b"".join(outp)
 
 def convert_to_carray(file_content):
@@ -275,7 +305,7 @@ def main():
         print(msg, file=sys.stderr)
         sys.exit(1)
     parser = argparse.ArgumentParser(description='Convert to UF2 or flash directly.')
-    parser.add_argument('input', metavar='INPUT', type=str, nargs='?',
+    parser.add_argument('input', metavar='INPUT', type=str, nargs='*',
                         help='input file (HEX, BIN or UF2)')
     parser.add_argument('-b', '--base', dest='base', type=str,
                         default="0x2000",
@@ -299,6 +329,8 @@ def main():
                         help='convert binary file to a C array, not UF2')
     parser.add_argument('-i', '--info', action='store_true',
                         help='display header information from UF2, do not convert')
+    parser.add_argument('-j', '--join', action='store_true',
+                        help='concatenate multiple UF2 files into one')
     args = parser.parse_args()
     appstartaddr = int(args.base, 0)
 
@@ -315,14 +347,20 @@ def main():
     if args.list:
         list_drives()
     else:
-        if not args.input:
-            error("Need input file")
-        with open(args.input, mode='rb') as f:
-            inpbuf = f.read()
+        if len(args.input) == 0:
+            error("Need input file(s)")
+        inpbuf = b""
+        for fn in args.input:
+            with open(fn, mode='rb') as f:
+                inpbuf += f.read()
         from_uf2 = is_uf2(inpbuf)
         ext = "uf2"
         if args.deploy:
             outbuf = inpbuf
+        elif args.join:
+            if not from_uf2:
+                error("--join requires UF2 files")
+            outbuf = concat_uf2(inpbuf)
         elif from_uf2 and not args.info:
             outbuf = convert_from_uf2(inpbuf)
             ext = "bin"
